@@ -5,7 +5,7 @@ require('./db')(wagner);
 
 var app = express();
 
-app.use('/api', require('./api')(wagner));
+app.use('/api', require('./api')(wagner, app));
 
 app.listen(3000);
 console.log('Listening on port 3000!');

@@ -1,8 +1,10 @@
 var bodyparser = require('body-parser');
 var express = require('express');
-var status = require('http-status');
 
-module.exports = function(wagner) {
+var passport = require('passport');
+var LocalStrategy = require('passport-local').Strategy;
+
+module.exports = function(wagner, app) {
   var api = express.Router();
 
   api.use(bodyparser.json());
@@ -10,25 +12,59 @@ module.exports = function(wagner) {
     extended: true
   }));
 
-  api.post('/login', wagner.invoke(function(User) {
-    return function(req, res) {
-      var user = req.body.user;
-      var password = req.body.password;
+  var User = wagner.invoke(function(User) {
+    return User;
+  })
 
-      User.findOne({ where: { name: user }}).then(
+  passport.use(new LocalStrategy(
+    function(username, password, done) {
+      User.findOne({ where: { name: username } }).then(
         function(user) {
           if (user && user.verifyPassword(password)) {
-            return res.json({ status: 'OK' });
+            done(null, user);
           } else {
-            return res.json({ status: 'FAILED' });
+            done(null, false);
           }
         },
         function(err) {
-          return res.json({ status: 'FAILED' });
+          return done(err);
         }
-      )
-    };
+      );
+    }
+  ));
+
+  passport.serializeUser(function(user, done) {
+    done(null, user.name);
+  });
+
+  passport.deserializeUser(function(username, done) {
+    User.findOne({ where: { name: username} }).then(
+      function(user) {
+        done(null, user);
+      },
+      function(err) {
+        done(err, null);
+      }
+    )
+  });
+
+  app.use(require('express-session')({
+    secret: 'this is a secret'
   }));
+  app.use(passport.initialize());
+  app.use(passport.session());
+
+  api.post('/login', function(req, res, next) {
+    passport.authenticate('local', function(err, user, info) {
+      console.log(user);
+      if (err) { return res.json({ status: 'FAILED' }); }
+      if (!user) { return res.json({ status: 'FAILED' }); }
+      req.logIn(user, function(err) {
+        if (err) { return next(err); }
+        return res.json({ status: 'OK' });
+      });
+    })(req, res, next);
+  });
 
   return api;
 }
