@@ -43,20 +43,18 @@ module.exports = function(wagner, app) {
         done(null, user);
       },
       function(err) {
-        done(err, null);
+        done(err, false);
       }
     )
   });
 
-  app.use(require('express-session')({
-    secret: 'this is a secret'
-  }));
+  app.use(require('cookie-parser')());
+  app.use(require('express-session')({ secret: 'keyboard cat', resave: true, saveUninitialized: true }));
   app.use(passport.initialize());
   app.use(passport.session());
 
   api.post('/login', function(req, res, next) {
     passport.authenticate('local', function(err, user, info) {
-      console.log(user);
       if (err) { return res.json({ status: 'FAILED' }); }
       if (!user) { return res.json({ status: 'FAILED' }); }
       req.logIn(user, function(err) {
@@ -64,6 +62,14 @@ module.exports = function(wagner, app) {
         return res.json({ status: 'OK' });
       });
     })(req, res, next);
+  });
+
+  api.get('/me', function(req, res) {
+    console.log(req.user);
+    if (!req.user) {
+      return res.json({ status: 'FAILED' });
+    }
+    return res.json(req.user);
   });
 
   return api;
