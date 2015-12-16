@@ -10,7 +10,7 @@ app.use(require('express-session')({ secret: 'keyboard cat', resave: true, saveU
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use('/api/user', require('./api/user')(wagner));
+app.use('/api/v1/user', require('./api/user')(wagner));
 
 app.listen(3000);
 console.log('Listening on port 3000!');
