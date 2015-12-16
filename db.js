@@ -25,4 +25,5 @@ module.exports = function(wagner) {
   wagner.factory('User', function() {
     return User;
   });
+  
 }

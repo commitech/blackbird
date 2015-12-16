@@ -1,7 +1,6 @@
 var bodyparser = require('body-parser');
 var express = require('express');
 var status = require('http-status');
-var crypto = require('crypto');
 
 module.exports = function(wagner) {
   var api = express.Router();
@@ -18,11 +17,7 @@ module.exports = function(wagner) {
 
       User.findOne({ where: { name: user }}).then(
         function(user) {
-          var shasum = crypto.createHash('sha1');
-          shasum.update(password);
-          var digest = shasum.digest('hex');
-
-          if (digest === user.password) {
+          if (user && user.verifyPassword(password)) {
             return res.json({ status: 'OK' });
           } else {
             return res.json({ status: 'FAILED' });

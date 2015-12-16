@@ -1,4 +1,4 @@
-/* jshint indent: 2 */
+var crypto = require('crypto');
 
 module.exports = function(sequelize, DataTypes) {
   return sequelize.define('users', {
@@ -72,6 +72,18 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.DATE,
       allowNull: false,
       defaultValue: '0000-00-00 00:00:00'
+    }
+  }, {
+    instanceMethods: {
+      verifyPassword: function(password) {
+        if (!password) {
+          return false;
+        }
+        var shasum = crypto.createHash('sha1');
+        shasum.update(password);
+        var digest = shasum.digest('hex');
+        return (digest === this.password);
+      }
     }
   });
 };
