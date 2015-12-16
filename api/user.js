@@ -4,7 +4,7 @@ var express = require('express');
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 
-module.exports = function(wagner, app) {
+module.exports = function(wagner) {
   var api = express.Router();
 
   api.use(bodyparser.json());
@@ -47,11 +47,6 @@ module.exports = function(wagner, app) {
       }
     )
   });
-
-  app.use(require('cookie-parser')());
-  app.use(require('express-session')({ secret: 'keyboard cat', resave: true, saveUninitialized: true }));
-  app.use(passport.initialize());
-  app.use(passport.session());
 
   api.post('/login', function(req, res, next) {
     passport.authenticate('local', function(err, user, info) {
