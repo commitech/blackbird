@@ -10,7 +10,8 @@ var sequelize = new Sequelize('commitech', 'root', 'root', {
   },
 
   define: {
-    timestamps: false
+    timestamps: false,
+    freezeTableName: true
   }
 });
 
@@ -21,9 +22,14 @@ module.exports = function(wagner) {
   });
 
   var User = sequelize.import("./models/users");
+  var DutySchedule = sequelize.import("./models/duty_schedule");
 
   wagner.factory('User', function() {
     return User;
+  });
+
+  wagner.factory('DutySchedule', function() {
+    return DutySchedule;
   });
   
 }
