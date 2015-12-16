@@ -17,8 +17,10 @@
   },
   "homepage": "https://github.com/jonathanirvings/blackbird-2#readme",
   "dependencies": {
+    "body-parser": "^1.14.1",
     "express": "^4.13.3",
     "express-session": "^1.12.1",
+    "http-status": "^0.2.0",
     "mysql": "^2.10.0",
     "sequelize": "^3.14.2",
     "serialize": "^0.1.3",
