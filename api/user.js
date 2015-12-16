@@ -60,7 +60,6 @@ module.exports = function(wagner) {
   });
 
   api.get('/me', function(req, res) {
-    console.log(req.user);
     if (!req.user) {
       return res.json({ status: 'FAILED' });
     }
