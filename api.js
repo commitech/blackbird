@@ -16,7 +16,7 @@ module.exports = function(wagner) {
       var user = req.body.user;
       var password = req.body.password;
 
-      User.findOne({ where: {name: req.body.user }}).then(
+      User.findOne({ where: { name: user }}).then(
         function(user) {
           var shasum = crypto.createHash('sha1');
           shasum.update(password);
