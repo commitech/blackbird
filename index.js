@@ -11,7 +11,7 @@ app.use(require('express-session')({ secret: 'keyboard cat', resave: true, saveU
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use('/api', middleware.loggedInOnly);
+app.get(middleware.loggedInOnly);
 
 app.use('/api/v1/user', require('./api/user')(wagner));
 app.use('/api/v1/duty', require('./api/duty')(wagner));
