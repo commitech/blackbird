@@ -61,7 +61,7 @@ module.exports = function(wagner) {
     })(req, res, next);
   });
 
-  api.post('/logout', function(req, res) {
+  api.get('/logout', function(req, res) {
     if (!req.user) {
       return res.json({ status: Const.FAILED_STATUS_MESSAGE, 
                         comment: Const.NOT_LOGGED_IN_ERROR_MESSAGE });

@@ -19,10 +19,6 @@ module.exports = function(wagner) {
   })
 
   api.get('/get_duty', function(req, res) {
-    if (!req.user) {
-      return res.json({ status: Const.FAILED_STATUS_MESSAGE, 
-                        comment: Const.NOT_LOGGED_IN });
-    }
     if (!req.query.id) {
       return res.json({ status: Const.FAILED_STATUS_MESSAGE, 
                         comment: 'ID is not spesified' });
