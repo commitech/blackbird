@@ -62,20 +62,12 @@ module.exports = function(wagner) {
   });
 
   api.get('/logout', function(req, res) {
-    if (!req.user) {
-      return res.json({ status: Const.FAILED_STATUS_MESSAGE, 
-                        comment: Const.NOT_LOGGED_IN_ERROR_MESSAGE });
-    }
     req.logout();
     return res.json({status: Const.OK_STATUS_MESSAGE});
   });
 
   api.get('/me', function(req, res) {
-    if (!req.user) {
-      return res.json({ status: Const.OK_STATUS_MESSAGE, 
-                        comment: Const.NOT_LOGGED_IN_ERROR_MESSAGE });
-    }
-    return res.json(req.user);
+    return res.json({ status: Const.OK_STATUS_MESSAGE, user: req.user});
   });
 
   return api;
