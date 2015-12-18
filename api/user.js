@@ -52,30 +52,22 @@ module.exports = function(wagner) {
 
   api.post('/login', function(req, res, next) {
     passport.authenticate('local', function(err, user, info) {
-      if (err) { return res.json({ status: Const.FAILED_STATUS_MESSAGE }); }
-      if (!user) { return res.json({ status: Const.FAILED_STATUS_MESSAGE }); }
+      if (err) { return res.json({ status: Const.STATUS.FAILED }); }
+      if (!user) { return res.json({ status: Const.STATUS.FAILED }); }
       req.logIn(user, function(err) {
         if (err) { return next(err); }
-        return res.json({ status: Const.OK_STATUS_MESSAGE });
+        return res.json({ status: Const.STATUS.OK });
       });
     })(req, res, next);
   });
 
   api.get('/logout', function(req, res) {
-    if (!req.user) {
-      return res.json({ status: Const.FAILED_STATUS_MESSAGE, 
-                        comment: Const.NOT_LOGGED_IN_ERROR_MESSAGE });
-    }
     req.logout();
-    return res.json({status: Const.OK_STATUS_MESSAGE});
+    return res.json({ status: Const.STATUS.OK });
   });
 
   api.get('/me', function(req, res) {
-    if (!req.user) {
-      return res.json({ status: Const.OK_STATUS_MESSAGE, 
-                        comment: Const.NOT_LOGGED_IN_ERROR_MESSAGE });
-    }
-    return res.json(req.user);
+    return res.json({ status: Const.STATUS.OK, user: req.user});
   });
 
   return api;

@@ -1,7 +1,7 @@
 var Const = require('./const');
 var Sequelize = require('sequelize');
-var sequelize = new Sequelize(Const.DB_NAME, Const.DB_USERNAME, Const.DB_PASSWORD, {
-  host: Const.DB_LOCATION,
+var sequelize = new Sequelize(Const.DB.NAME, Const.DB.USERNAME, Const.DB.PASSWORD, {
+  host: Const.DB.LOCATION,
   dialect: 'mysql',
 
   pool: {

@@ -4,7 +4,7 @@ var express = require('express');
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 
-var Const = require('../const.js');
+var Const = require('../const');
 
 module.exports = function(wagner) {
   var Duty = require('../objects/duty')(wagner);
@@ -21,7 +21,7 @@ module.exports = function(wagner) {
                         comment: 'ID is not specified' });
     }
     Duty.getDuty(req.query.id, function(duty) {
-      res.json({status: Const.OK_STATUS_MESSAGE, 
+      res.json({status: Const.STATUS.OK,
                   result: duty});
     });
   });

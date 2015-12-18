@@ -3,6 +3,7 @@ var express = require('express');
 var superagent = require('superagent');
 var wagner = require('wagner-core');
 var passport = require('passport');
+var middleware = require('./middleware');
 
 var URL_ROOT = 'http://localhost:3000';
 
@@ -22,6 +23,8 @@ describe("User API Tests", function() {
     app.use(require('express-session')({ secret: 'keyboard cat', resave: true, saveUninitialized: true }));
     app.use(passport.initialize());
     app.use(passport.session());
+
+    app.get(middleware.loggedInOnly);
 
     app.use(require('./api/user')(wagner));
 
@@ -84,7 +87,28 @@ describe("User API Tests", function() {
         result = JSON.parse(res.text);
       });
 
-      assert(result.name == 'admin');
+      assert(result.user.name == 'admin');
+      done();
+    });
+  });
+
+  it('can logout after login', function(done) {
+    var loginUrl = URL_ROOT + '/login';
+    agent.post(loginUrl).send({
+      username: 'admin',
+      password: 'password'
+    });
+    var logoutUrl = URL_ROOT + '/logout';
+    agent.get(logoutUrl);
+
+    agent.get(URL_ROOT + '/me').end(function(err, res) {
+
+      assert.equal(res.status, 200);
+      var result;
+      assert.doesNotThrow(function() {
+        result = JSON.parse(res.text);
+      });
+      assert.equal(result.status, 'OK');
       done();
     });
   });
