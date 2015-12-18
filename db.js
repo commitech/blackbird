@@ -1,6 +1,7 @@
+var Const = require('./const');
 var Sequelize = require('sequelize');
-var sequelize = new Sequelize('commitech', 'root', 'root', {
-  host: '54.169.17.107',
+var sequelize = new Sequelize(Const.DB_NAME, Const.DB_USERNAME, Const.DB_PASSWORD, {
+  host: Const.DB_LOCATION,
   dialect: 'mysql',
 
   pool: {
@@ -23,9 +24,14 @@ module.exports = function(wagner) {
 
   var User = sequelize.import("./models/users");
   var DutySchedule = sequelize.import("./models/duty_schedule");
+  var Duty = sequelize.import("./models/duty");
 
   wagner.factory('User', function() {
     return User;
+  });
+
+  wagner.factory('Duty', function() {
+    return Duty;
   });
 
   wagner.factory('DutySchedule', function() {

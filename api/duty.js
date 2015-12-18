@@ -7,6 +7,7 @@ var LocalStrategy = require('passport-local').Strategy;
 var Const = require('../const.js');
 
 module.exports = function(wagner) {
+  var Duty = require('../objects/duty')(wagner);
   var api = express.Router();
 
   api.use(bodyparser.json());
@@ -14,22 +15,17 @@ module.exports = function(wagner) {
     extended: true
   }));
 
-  var dutySchedule = wagner.invoke(function(DutySchedule) {
-    return DutySchedule;
-  })
-
   api.get('/get_duty', function(req, res) {
     if (!req.query.id) {
       return res.json({ status: Const.FAILED_STATUS_MESSAGE, 
-                        comment: 'ID is not spesified' });
+                        comment: 'ID is not specified' });
     }
-    dutySchedule.findOne({where: {id: req.query.id} }).then(
-      function(duty) {
-        res.json({status: Const.OK_STATUS_MESSAGE, 
-                  result: duty.dataValues});
-      }
-    );
+    Duty.getDuty(req.query.id, function(duty) {
+      res.json({status: Const.OK_STATUS_MESSAGE, 
+                  result: duty});
+    });
   });
 
   return api;
 }
+
