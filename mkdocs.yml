@@ -4,4 +4,4 @@ pages:
     - [object.md, Object types]
     - [method.md, Methods]
 theme: united
-repo_url: https://github.com/jonathanirvings/blackbird-2
+repo_url: https://github.com/commitech/blackbird
