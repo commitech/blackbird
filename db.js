@@ -33,6 +33,7 @@ module.exports = function(wagner) {
 
   _.each(models, function(value, key) {
     wagner.factory(key, function() {
+      value.wagner = wagner;
       return value;
     });
   });

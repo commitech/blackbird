@@ -35,11 +35,11 @@ module.exports = function(sequelize, DataTypes) {
         });
       },
 
-      getSupervisorId: function(specificDuty, wagner, callback) {
-        var GrabbedDuty = wagner.invoke(function(GrabbedDuty) {
+      getSupervisorId: function(specificDuty, callback) {
+        var GrabbedDuty = this.wagner.invoke(function(GrabbedDuty) {
           return GrabbedDuty;
         });
-        var ReleasedDuty = wagner.invoke(function(ReleasedDuty) {
+        var ReleasedDuty = this.wagner.invoke(function(ReleasedDuty) {
           return ReleasedDuty;
         });
 
@@ -66,12 +66,12 @@ module.exports = function(sequelize, DataTypes) {
         });
       },
 
-      grabDuty: function(user, specificDuty, grabRestriction, wagner, callbackOk, callbackError) {
-        var GrabbedDuty = wagner.invoke(function(GrabbedDuty) {
+      grabDuty: function(user, specificDuty, grabRestriction, callbackOk, callbackError) {
+        var GrabbedDuty = this.wagner.invoke(function(GrabbedDuty) {
           return GrabbedDuty;
         });
 
-        this.getSupervisorId(specificDuty, wagner, function(freeSlot, supervisorId) {
+        this.getSupervisorId(specificDuty, function(freeSlot, supervisorId) {
           if (freeSlot) {
             // duty is free. released and not grabbed yet
 
@@ -90,12 +90,12 @@ module.exports = function(sequelize, DataTypes) {
         });
       },
 
-      releaseDuty: function(user, specificDuty, wagner, callbackOk, callbackError) {
-        var ReleasedDuty = wagner.invoke(function(ReleasedDuty) {
+      releaseDuty: function(user, specificDuty, callbackOk, callbackError) {
+        var ReleasedDuty = this.wagner.invoke(function(ReleasedDuty) {
           return ReleasedDuty;
         });
 
-        this.getSupervisorId(specificDuty, wagner, function(freeSlot, supervisorId) {
+        this.getSupervisorId(specificDuty, function(freeSlot, supervisorId) {
           if (!freeSlot && supervisorId == user.id) {
             // duty is indeed belong to the user
             
