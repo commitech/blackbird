@@ -30,7 +30,7 @@ Parameter :
 
 `grab_restriction` : Boolean. True if grab is restricted with duty grab rules.
 
-### duty/drop_duty
+### duty/release_duty
 
 Parameter :
 
@@ -38,7 +38,7 @@ Parameter :
 
 `specific_duty` : Specific duty object. Required parameter : `duty_id`, `day`, `month`, `year`
 
-### duty/drop_duties
+### duty/release_duties
 
 Parameter : 
 
@@ -84,7 +84,7 @@ Parameter :
 
 `specific_duty` : Specific Duty object. Required parameter : `duty_id`, `day`, `month`, `year`
 
-Returns the supervisor ID that is currently dutying on `specific_duty `. The result will be an object consisting of `supervisor_id` and `is_free`. `is_free` is a boolean indicating whether a duty is free or not. If it is, `supervisor_id` is the ID of the supervisor who releases that duty.
+Returns the supervisor ID that is creleasedurrently dutying on `specific_duty `. The result will be an object consisting of `supervisor_id` and `is_free`. `is_free` is a boolean indicating whether a duty is free or not. If it is, `supervisor_id` is the ID of the supervisor who releases that duty.
 
 ### duty/get_duty_schedule
 
@@ -104,7 +104,7 @@ Parameter :
 
 `day_name` : String.
 
-Returns the array of supervisor ID which originally (not after grab/drop) duties on the parameter day, sorted from the earlist to latest.
+Returns the array of supervisor ID which originally (not after grab/release) duties on the parameter day, sorted from the earlist to latest.
 
 ### duty/get_available_duties
 
@@ -118,13 +118,13 @@ Parameter :
 
 `location` : String.
 
-Returns the list of available (dropped but not grabbed yet) duties on the parameter day
+Returns the list of available (released but not grabbed yet) duties on the parameter day
 
 ### duty/get_available_duties
 
 No parameter.
 
-Returns the list of all available (dropped but not grabbed yet) duties.
+Returns the list of all available (released but not grabbed yet) duties.
 
 
 
