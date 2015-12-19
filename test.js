@@ -189,7 +189,6 @@ describe("Duty API test", function(){
         assert.doesNotThrow(function() {
           result = JSON.parse(res.text);
         });
-        console.log(result);
         assert.equal(result.status, 'OK');
         assert.equal(result.result.id, 1);
         assert.equal(result.result.day_name, 'Monday');
