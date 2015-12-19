@@ -109,7 +109,7 @@ module.exports = function(sequelize, DataTypes) {
             });
 
           } else {
-            callbackError('Duty is belong to the user');
+            callbackError('Duty is not belong to the user');
           }
         });
       },
