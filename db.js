@@ -1,9 +1,9 @@
-var Const = require('./const');
+var config = require('./config');
 var Sequelize = require('sequelize');
 var _ = require('underscore');
 
-var db = new Sequelize(Const.DB.NAME, Const.DB.USERNAME, Const.DB.PASSWORD, {
-  host: Const.DB.HOST,
+var db = new Sequelize(config.DB.NAME, config.DB.USERNAME, config.DB.PASSWORD, {
+  host: config.DB.HOST,
   dialect: 'mysql',
 
   pool: {
