@@ -116,7 +116,7 @@ describe("User API Tests", function() {
           assert.doesNotThrow(function() {
             result = JSON.parse(res.text);
           });
-          assert.equal(result.status, 'OK');
+          assert.equal(result.status, 'FAILED');
           done();
         });
       });
@@ -189,12 +189,13 @@ describe("Duty API test", function(){
         assert.doesNotThrow(function() {
           result = JSON.parse(res.text);
         });
+        console.log(result);
         assert.equal(result.status, 'OK');
-        assert.equal(result.result, {id: 1, 
-                                     day_name: 'Monday', 
-                                     start_time: '08:00:00',
-                                     end_time: '08:30:00',
-                                     location: 'yih'});
+        assert.equal(result.result.id, 1);
+        assert.equal(result.result.day_name, 'Monday');
+        assert.equal(result.result.start_time, '08:00:00');
+        assert.equal(result.result.end_time, '08:30:00');
+        assert.equal(result.result.location, 'yih');
         done();
       });
     });

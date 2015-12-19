@@ -24,8 +24,8 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false
     }
   }, {
-    instanceMethods: {
-      getDuty: function(dutyId) {
+    classMethods: {
+      getDuty: function(dutyId, callback) {
         this.findOne({ where: { id: dutyId } }).then( function(duty) {
           callback(duty);
         });
