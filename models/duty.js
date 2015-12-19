@@ -23,5 +23,13 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING,
       allowNull: false
     }
+  }, {
+    instanceMethods: {
+      getDuty: function(dutyId) {
+        this.findOne({ where: { id: dutyId } }).then( function(duty) {
+          callback(duty);
+        });
+      }
+    }
   });
 };

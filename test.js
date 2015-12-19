@@ -32,7 +32,7 @@ describe("User API Tests", function() {
 
     app.get('*', middleware.loggedInOnly);
 
-    app.use(require('./api/user')(wagner));
+    app.use(require('./api')(wagner));
 
     server = app.listen(3000);
 
@@ -44,7 +44,7 @@ describe("User API Tests", function() {
   });
 
   it('cannot login with invalid credentials', function(done) {
-    var url = URL_ROOT + '/login';
+    var url = URL_ROOT + '/user/login';
     agent.post(url).send({
       username: 'admin',
       password: 'password2'
@@ -62,7 +62,7 @@ describe("User API Tests", function() {
   });
 
   it('can login with valid credentials', function(done) {
-    var url = URL_ROOT + '/login';
+    var url = URL_ROOT + '/user/login';
     agent.post(url).send({
       username: 'admin',
       password: 'password'
@@ -80,43 +80,46 @@ describe("User API Tests", function() {
   });
 
   it('connection persist after login', function(done) {
-    var url = URL_ROOT + '/login';
+    var url = URL_ROOT + '/user/login';
     agent.post(url).send({
       username: 'admin',
       password: 'password'
-    });
-    agent.get(URL_ROOT + '/me').end(function(err, res) {
+    }).
+    end(function(err, res) {
+      agent.get(URL_ROOT + '/user/me').end(function(err, res) {
+        assert.equal(res.status, 200);
+        var result;
+        assert.doesNotThrow(function() {
+          result = JSON.parse(res.text);
+        });
 
-      assert.equal(res.status, 200);
-      var result;
-      assert.doesNotThrow(function() {
-        result = JSON.parse(res.text);
+        assert.equal(result.status, 'OK');
+        assert.equal(result.user.name, 'admin');
+        done();
       });
-
-      assert.equal(result.status, 'OK');
-      assert.equal(result.user.name, 'admin');
-      done();
     });
   });
 
   it('can logout after login', function(done) {
-    var loginUrl = URL_ROOT + '/login';
+    var loginUrl = URL_ROOT + '/user/login';
     agent.post(loginUrl).send({
       username: 'admin',
       password: 'password'
-    });
-    var logoutUrl = URL_ROOT + '/logout';
-    agent.get(logoutUrl);
-
-    agent.get(URL_ROOT + '/me').end(function(err, res) {
-
-      assert.equal(res.status, 200);
-      var result;
-      assert.doesNotThrow(function() {
-        result = JSON.parse(res.text);
+    }).
+    end(function(err, res) {
+      var logoutUrl = URL_ROOT + '/user/logout';
+      agent.get(logoutUrl).
+      end(function(err, res) {
+        agent.get(URL_ROOT + '/user/me').end(function(err, res) {
+          assert.equal(res.status, 200);
+          var result;
+          assert.doesNotThrow(function() {
+            result = JSON.parse(res.text);
+          });
+          assert.equal(result.status, 'OK');
+          done();
+        });
       });
-      assert.equal(result.status, 'OK');
-      done();
     });
   });
 
