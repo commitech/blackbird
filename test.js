@@ -200,6 +200,5 @@ describe("Duty API test", function(){
     });
   });
 
-
 });
 

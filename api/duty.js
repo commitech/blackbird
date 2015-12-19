@@ -19,6 +19,17 @@ module.exports = function(wagner) {
     });
   });
 
+  api.get('/get_supervisor_id', function(req, res) {
+    if (!req.query.specific_duty) {
+      return res.json({ status: Const.STATUS.FAILED, 
+                        comment: 'Specific duty is not specified' });
+    }
+    Duty.getSupervisorId(JSON.parse(req.query.specific_duty), wagner, function(duty) {
+      return res.json({ status: Const.STATUS.OK,
+                        result: duty });
+    });
+  });
+
   return api;
 }
 

@@ -27,7 +27,8 @@ module.exports = function(wagner) {
   var models = {
     User: db.import('./models/users'),
     Duty: db.import('./models/duty'),
-    DutySchedule: db.import('./models/duty_schedule')
+    GrabbedDuty: db.import('./models/grabbed_duty'),
+    ReleasedDuty: db.import('./models/released_duty')
   }
 
   _.each(models, function(value, key) {

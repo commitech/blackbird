@@ -11,11 +11,11 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.INTEGER(11),
       allowNull: false
     },
-    schedule_id: {
+    duty_id: {
       type: DataTypes.INTEGER(11),
       allowNull: false
     },
-    date: {
+    day: {
       type: DataTypes.INTEGER(11),
       allowNull: false
     },
@@ -25,10 +25,6 @@ module.exports = function(sequelize, DataTypes) {
     },
     year: {
       type: DataTypes.INTEGER(30),
-      allowNull: false
-    },
-    venue: {
-      type: DataTypes.STRING,
       allowNull: false
     },
     accept_time: {
