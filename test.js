@@ -200,5 +200,116 @@ describe("Duty API test", function(){
     });
   });
 
+  it('can get supervisor ID', function(done) {
+    var loginUrl = URL_ROOT + '/user/login';
+    agent.post(loginUrl).send({
+      username: 'admin',
+      password: 'password'
+    }).end(function(){
+      agent.get(URL_ROOT + '/duty/get_supervisor_id?specific_duty={"duty_id":"1","day":1, "month":1, "year":1}').end(function(err, res) {
+        assert.equal(res.status, 200);
+        var result;
+        assert.doesNotThrow(function() {
+          result = JSON.parse(res.text);
+        });
+        assert.equal(result.status, 'OK');
+        assert.equal(result.result, 1);
+        done();
+      });
+    });
+  })
+
+  it('cannot grab duty that is not free', function(done) {
+    var loginUrl = URL_ROOT + '/user/login';
+    agent.post(loginUrl).send({
+      username: 'admin',
+      password: 'password'
+    }).end(function(){
+      agent.get(URL_ROOT + '/duty/grab_duty?user={"id":"1"}&specific_duty={"duty_id":"1","day":1, "month":1, "year":1}').end(function(err, res) {
+        assert.equal(res.status, 200);
+        var result;
+        assert.doesNotThrow(function() {
+          result = JSON.parse(res.text);
+        });
+        assert.equal(result.status, 'FAILED');
+        done();
+      });
+    });
+  });
+
+  it('cannot release duty that does not belong to the user', function(done) {
+    var loginUrl = URL_ROOT + '/user/login';
+    agent.post(loginUrl).send({
+      username: 'admin',
+      password: 'password'
+    }).end(function(){
+      agent.get(URL_ROOT + '/duty/release_duty?user={"id":"2"}&specific_duty={"duty_id":"1","day":1, "month":1, "year":1}').end(function(err, res) {
+        assert.equal(res.status, 200);
+        var result;
+        assert.doesNotThrow(function() {
+          result = JSON.parse(res.text);
+        });
+        assert.equal(result.status, 'FAILED');
+        done();
+      });
+    });
+  });
+
+  it('can release duty that belongs to the user', function(done) {
+    var loginUrl = URL_ROOT + '/user/login';
+    agent.post(loginUrl).send({
+      username: 'admin',
+      password: 'password'
+    }).end(function(){
+      agent.get(URL_ROOT + '/duty/release_duty?user={"id":"1"}&specific_duty={"duty_id":"1","day":1, "month":1, "year":1}').end(function(err, res) {
+        assert.equal(res.status, 200);
+        var result;
+        assert.doesNotThrow(function() {
+          result = JSON.parse(res.text);
+        });
+        assert.equal(result.status, 'OK');
+        agent.get(URL_ROOT + '/duty/get_supervisor_id?specific_duty={"duty_id":"1","day":1, "month":1, "year":1}').end(function(err, res) {
+          assert.equal(res.status, 200);
+          var result;
+          assert.doesNotThrow(function() {
+            result = JSON.parse(res.text);
+          });
+          assert.equal(result.status, 'OK');
+          assert.equal(result.result, -1);
+          
+          done();
+        });
+      });
+    });
+  });
+
+it('can grab duty that is free', function(done) {
+    var loginUrl = URL_ROOT + '/user/login';
+    agent.post(loginUrl).send({
+      username: 'admin',
+      password: 'password'
+    }).end(function(){
+      agent.get(URL_ROOT + '/duty/grab_duty?user={"id":"1"}&specific_duty={"duty_id":"1","day":1, "month":1, "year":1}').end(function(err, res) {
+        assert.equal(res.status, 200);
+        var result;
+        assert.doesNotThrow(function() {
+          result = JSON.parse(res.text);
+        });
+        assert.equal(result.status, 'OK');
+        agent.get(URL_ROOT + '/duty/get_supervisor_id?specific_duty={"duty_id":"1","day":1, "month":1, "year":1}').end(function(err, res) {
+          assert.equal(res.status, 200);
+          var result;
+          assert.doesNotThrow(function() {
+            result = JSON.parse(res.text);
+          });
+          assert.equal(result.status, 'OK');
+          assert.equal(result.result, 1);
+          
+          done();
+        });
+      });
+    });
+  });
+
 });
 

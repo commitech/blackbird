@@ -36,7 +36,6 @@ module.exports = function(sequelize, DataTypes) {
       },
 
       getSupervisorId: function(specificDuty, wagner, callback) {
-        console.log(specificDuty);
         this.findOne({ where: {id: specificDuty.duty_id}}).then( function(duty) {
           var GrabbedDuty = wagner.invoke(function(GrabbedDuty) {
             return GrabbedDuty;
@@ -69,7 +68,54 @@ module.exports = function(sequelize, DataTypes) {
             });
           });
         });
-      }
+      },
+
+      grabDuty: function(user, specificDuty, grabRestriction, wagner, callbackOk, callbackError) {
+        this.getSupervisorId(specificDuty, wagner, function(supervisorId) {
+          if (supervisorId < 0) {
+            // duty is free. released and not grabbed yet
+            var GrabbedDuty = wagner.invoke(function(GrabbedDuty) {
+              return GrabbedDuty;
+            });
+            GrabbedDuty.create({supervisor_id: user.id,
+                                       duty_id: specificDuty.duty_id,
+                                       day: specificDuty.day,
+                                       month: specificDuty.month,
+                                       year: specificDuty.year}).then(function(){
+              callbackOk();
+            },function(err){
+              console.log(err);
+            });
+
+          } else {
+            // duty is not free.
+            callbackError('Duty is not available for grab');
+          }
+        });
+      },
+
+      releaseDuty: function(user, specificDuty, wagner, callbackOk, callbackError) {
+        this.getSupervisorId(specificDuty, wagner, function(supervisorId) {
+          if (supervisorId == user.id) {
+            // duty is indeed belong to the user
+            var ReleasedDuty = wagner.invoke(function(ReleasedDuty) {
+              return ReleasedDuty;
+            });
+            ReleasedDuty.create({supervisor_id: user.id,
+                                       duty_id: specificDuty.duty_id,
+                                       day: specificDuty.day,
+                                       month: specificDuty.month,
+                                       year: specificDuty.year}).then(function(){
+              callbackOk();
+            },function(err){
+              console.log(err);
+            });
+
+          } else {
+            callbackError('Duty is belong to the user');
+          }
+        });
+      },
     }
   });
 };

@@ -30,6 +30,39 @@ module.exports = function(wagner) {
     });
   });
 
+  api.get('/grab_duty', function(req, res) {
+    if (!req.query.specific_duty) {
+      return res.json({ status: Const.STATUS.FAILED, 
+                        comment: 'Specific duty is not specified' });
+    }
+    if (!req.query.user) {
+      return res.json({ status: Const.STATUS.FAILED, 
+                        comment: 'User is not specified' });
+    }
+    Duty.grabDuty(JSON.parse(req.query.user), JSON.parse(req.query.specific_duty), true, wagner, function() {
+      return res.json({ status: Const.STATUS.OK});
+    }, function(err) {
+      return res.json({ status: Const.STATUS.FAILED, comment: err});
+    });
+  });
+
+  api.get('/release_duty', function(req, res) {
+    if (!req.query.specific_duty) {
+      return res.json({ status: Const.STATUS.FAILED, 
+                        comment: 'Specific duty is not specified' });
+    }
+    if (!req.query.user) {
+      return res.json({ status: Const.STATUS.FAILED, 
+                        comment: 'User is not specified' });
+    }
+    console.log("DKSJKJSDA");
+    Duty.releaseDuty(JSON.parse(req.query.user), JSON.parse(req.query.specific_duty), wagner, function() {
+      return res.json({ status: Const.STATUS.OK});
+    }, function(err) {
+      return res.json({ status: Const.STATUS.FAILED, comment: err});
+    });
+  });
+
   return api;
 }
 
