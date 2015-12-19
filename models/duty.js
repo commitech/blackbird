@@ -58,7 +58,6 @@ module.exports = function(sequelize, DataTypes) {
               } else {
                 // released has more entries than grabbed. 
                 // duty has been released and not grabbed yet.
-                // return the negative of the last person who released
                 callback(true, released[released.length - 1].dataValues.supervisor_id);
               }
             });
@@ -78,6 +77,8 @@ module.exports = function(sequelize, DataTypes) {
             var grabbedDuty = specificDuty;
             specificDuty.supervisor_id = user.id;
 
+            // TODO : Check for grabRestriction.
+
             GrabbedDuty.create(grabbedDuty).then(function(){
               callbackOk();
             }, function(err){
@@ -87,6 +88,20 @@ module.exports = function(sequelize, DataTypes) {
             // duty is not free.
             callbackError('Duty is not available for grab');
           }
+        });
+      },
+
+      grabDuties: function(user, specificDuties, grabRestriction, callbackOk, callbackError) {
+        var totalGrabbedDuties = 0;
+        specificDuties.forEach(function(specificDuty) {
+          grabDuty(user, specificDuty, grabRestriction, function(){
+            ++totalGrabbedDuties;
+            if (totalGrabbedDuties == specificDuties.length) {
+              callbackOk();
+            }
+          }, function(err) {
+            callbackError(err);
+          });
         });
       },
 
@@ -113,6 +128,43 @@ module.exports = function(sequelize, DataTypes) {
           }
         });
       },
+
+      releaseDuties: function(user, specificDuties, callbackOk, callbackError) {
+        var totalReleaseDuties = 0;
+        specificDuties.forEach(function(specificDuty) {
+          releaseDuty(user, specificDuty, function() {
+            ++totalReleaseDuties;
+            if (totalReleaseDuties == specificDuties.length) {
+              callbackOk();
+            }
+          }, function(err) {
+            callbackError(err);
+          });
+        });
+      },
+
+      assignPermanentDuty: function(user, duty, callbackOk, callbackError) {
+        // TODO : Remove all grab / release activity that involves this duty ID.
+        this.update({supervisor:user.id},{where:{id:duty.id}}).then(function(){
+          callbackOk();
+        },function(err){
+          callbackError(err);
+        })
+      },
+
+      assignPermanentDuties: function(user, duties, callbackOk, callbackError) {
+        var totalAssignedDuties = 0;
+        duties.forEach(function(duty) {
+          assignPermanentDuty(user, duty, function() {
+            ++totalAssignedDuties;
+            if (totalAssignedDuties == duties.length) {
+              callbackOk();
+            }
+          }, function(err) {
+            callbackError(err);
+          })
+        });
+      }
     }
   });
 };

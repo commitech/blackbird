@@ -155,4 +155,48 @@ describe("Duty API test", function(){
 
     });
   });
+
+  it('can assign duty permanently', function(done) {
+    passportStub.login({ name: 'admin', is_admin: true});
+
+    user = {id: 2};
+    duty = {id: 1};
+
+    agent.get(URL_ROOT + '/assign_permanent_duty?user=' + JSON.stringify(user) + '&duty=' + JSON.stringify(duty)).end(function(err, res) {
+      assert.equal(res.status, 200);
+      var json;
+      assert.doesNotThrow(function() {
+        json = JSON.parse(res.text);
+      });
+      assert.equal(json.status, 'OK');
+      
+      Duty.findById(duty.id).then( function(duty) {
+        assert.equal(duty.dataValues.supervisor, 2);
+        user = {id: 1};
+        duty = {id: 1};
+        Duty.assignPermanentDuty(user, duty, function(){
+          done();
+        });
+      });
+
+    });
+  });
+
+  it('cannot assign duty without admin access', function(done) {
+    passportStub.login({ name: 'admin', is_admin: false});
+
+    user = {id: 2};
+    duty = {id: 1};
+
+    agent.get(URL_ROOT + '/assign_permanent_duty?user=' + JSON.stringify(user) + '&duty=' + JSON.stringify(duty)).end(function(err, res) {
+      assert.equal(res.status, 200);
+      var json;
+      assert.doesNotThrow(function() {
+        json = JSON.parse(res.text);
+      });
+      assert.equal(json.status, 'FAILED');
+      assert.equal(json.comment, Const.MESSAGE.UNAUTHORIZED_ACCESS);
+      done();
+    });
+  });
 });
