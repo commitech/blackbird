@@ -3,6 +3,7 @@ var express = require('express');
 var superagent = require('superagent');
 var wagner = require('wagner-core');
 var passport = require('passport');
+var bodyparser = require('body-parser');
 var middleware = require('./middleware');
 
 var URL_ROOT = 'http://localhost:3000';
@@ -23,6 +24,10 @@ describe("User API Tests", function() {
     app.use(require('express-session')({ secret: 'keyboard cat', resave: true, saveUninitialized: true }));
     app.use(passport.initialize());
     app.use(passport.session());
+    app.use(bodyparser.json());
+    app.use(bodyparser.urlencoded({
+      extended: true
+    }));
 
     app.get(middleware.loggedInOnly);
 
@@ -50,7 +55,7 @@ describe("User API Tests", function() {
         result = JSON.parse(res.text);
       });
 
-      assert(result.status == 'FAILED');
+      assert.equal(result.status, 'FAILED');
       done();
     });
   });
@@ -68,7 +73,7 @@ describe("User API Tests", function() {
         result = JSON.parse(res.text);
       });
 
-      assert(result.status == 'OK');
+      assert.equal(result.status, 'OK');
       done();
     });
   });
@@ -87,7 +92,8 @@ describe("User API Tests", function() {
         result = JSON.parse(res.text);
       });
 
-      assert(result.user.name == 'admin');
+      assert.equal(result.status, 'OK');
+      assert.equal(result.user.name, 'admin');
       done();
     });
   });

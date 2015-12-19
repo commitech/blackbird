@@ -1,6 +1,4 @@
-var bodyparser = require('body-parser');
 var express = require('express');
-
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 
@@ -9,14 +7,9 @@ var Const = require('../const');
 module.exports = function(wagner) {
   var api = express.Router();
 
-  api.use(bodyparser.json());
-  api.use(bodyparser.urlencoded({
-    extended: true
-  }));
-
   var User = wagner.invoke(function(User) {
     return User;
-  })
+  });
 
   passport.use(new LocalStrategy(
     function(username, password, done) {

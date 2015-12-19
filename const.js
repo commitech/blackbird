@@ -12,6 +12,6 @@ exports.DB = {
   NAME: "commitech",
   USERNAME: "root",
   PASSWORD: "root",
-  LOCATION: "54.169.17.107"
+  HOST: "54.169.17.107"
 }
 
