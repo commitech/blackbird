@@ -25,13 +25,14 @@
     "passport": "^0.3.2",
     "passport-local": "^1.0.0",
     "sequelize": "^3.14.2",
-    "superagent": "^1.6.1",
+    "underscore": "^1.8.3",
     "wagner-core": "^0.2.0"
   },
   "devDependencies": {
     "gulp": "^3.9.0",
     "gulp-mocha": "^2.2.0",
     "mocha": "^2.3.4",
-    "nodemon": "^1.8.1"
+    "nodemon": "^1.8.1",
+    "superagent": "^1.6.1"
   }
 }

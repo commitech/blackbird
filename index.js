@@ -8,18 +8,15 @@ require('./db')(wagner);
 
 var app = express();
 
+// Middleware
 app.use(require('express-session')({ secret: 'keyboard cat', resave: true, saveUninitialized: true }));
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(bodyparser.json());
-app.use(bodyparser.urlencoded({
-  extended: true
-}));
-
+app.use(bodyparser.urlencoded({ extended: true }));
 app.get('*', middleware.loggedInOnly);
 
-app.use('/api/v1/user', require('./api/user')(wagner));
-app.use('/api/v1/duty', require('./api/duty')(wagner));
+app.use('/api/v1', require('./api')(wagner));
 
 app.listen(3000);
 console.log('Listening on port 3000!');

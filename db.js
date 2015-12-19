@@ -1,7 +1,8 @@
 var Const = require('./const');
 var Sequelize = require('sequelize');
+var _ = require('underscore');
 
-var sequelize = new Sequelize(Const.DB.NAME, Const.DB.USERNAME, Const.DB.PASSWORD, {
+var db = new Sequelize(Const.DB.NAME, Const.DB.USERNAME, Const.DB.PASSWORD, {
   host: Const.DB.HOST,
   dialect: 'mysql',
 
@@ -20,23 +21,19 @@ var sequelize = new Sequelize(Const.DB.NAME, Const.DB.USERNAME, Const.DB.PASSWOR
 module.exports = function(wagner) {
   
   wagner.factory('db', function() {
-    return sequelize;
+    return db;
   });
 
-  var User = sequelize.import("./models/users");
-  var Duty = sequelize.import("./models/duty");
-  var DutySchedule = sequelize.import("./models/duty_schedule");
+  var models = {
+    User: db.import('./models/users'),
+    Duty: db.import('./models/duty'),
+    DutySchedule: db.import('./models/duty_schedule')
+  }
 
-  wagner.factory('User', function() {
-    return User;
-  });
-
-  wagner.factory('Duty', function() {
-    return Duty;
-  });
-
-  wagner.factory('DutySchedule', function() {
-    return DutySchedule;
+  _.each(models, function(value, key) {
+    wagner.factory(key, function() {
+      return value;
+    });
   });
   
 }
