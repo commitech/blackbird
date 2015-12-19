@@ -104,7 +104,7 @@ module.exports = function(sequelize, DataTypes) {
 
             ReleasedDuty.create(releasedDuty).then(function(){
               callbackOk();
-            },function(err){
+            }, function(err){
               console.log(err);
             });
 

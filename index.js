@@ -3,13 +3,14 @@ var wagner = require('wagner-core');
 var passport = require('passport');
 var bodyparser = require('body-parser');
 var middleware = require('./middleware');
+var Const = require('./const');
 
 require('./db')(wagner);
 
 var app = express();
 
 // Middleware
-app.use(require('express-session')({ secret: 'keyboard cat', resave: true, saveUninitialized: true }));
+app.use(require('express-session')({ secret: Const.APP.SECRET_KEY, resave: true, saveUninitialized: true }));
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(bodyparser.json());
