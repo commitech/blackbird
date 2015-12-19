@@ -63,7 +63,8 @@ module.exports = function(sequelize, DataTypes) {
               } else {
                 // released has more entries than grabbed. 
                 // duty has been released and not grabbed yet.
-                callback(-1);
+                // return the negative of the last person who released
+                callback(-1 * released[released.length - 1].dataValues.supervisor_id);
               }
             });
           });
