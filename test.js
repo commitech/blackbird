@@ -213,7 +213,8 @@ describe("Duty API test", function(){
           result = JSON.parse(res.text);
         });
         assert.equal(result.status, 'OK');
-        assert.equal(result.result, 1);
+        assert.equal(result.result.is_free, false);
+        assert.equal(result.result.supervisor_id, 1);
         done();
       });
     });
@@ -275,8 +276,8 @@ describe("Duty API test", function(){
             result = JSON.parse(res.text);
           });
           assert.equal(result.status, 'OK');
-          assert.equal(result.result, -1);
-          
+          assert.equal(result.result.is_free, true);
+          assert.equal(result.result.supervisor_id, 1);
           done();
         });
       });
@@ -303,7 +304,8 @@ it('can grab duty that is free', function(done) {
             result = JSON.parse(res.text);
           });
           assert.equal(result.status, 'OK');
-          assert.equal(result.result, 1);
+          assert.equal(result.result.is_free, false);
+          assert.equal(result.result.supervisor_id, 1);
           
           done();
         });

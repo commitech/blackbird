@@ -14,7 +14,7 @@ module.exports = function(sequelize, DataTypes) {
     time: {
       type: DataTypes.DATE,
       allowNull: false,
-      defaultValue: 'CURRENT_TIMESTAMP'
+      defaultValue: sequelize.fn('NOW')
     },
     venue: {
       type: DataTypes.STRING,

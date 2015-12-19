@@ -24,9 +24,9 @@ module.exports = function(wagner) {
       return res.json({ status: Const.STATUS.FAILED, 
                         comment: 'Specific duty is not specified' });
     }
-    Duty.getSupervisorId(JSON.parse(req.query.specific_duty), wagner, function(duty) {
+    Duty.getSupervisorId(JSON.parse(req.query.specific_duty), wagner, function(freeSlot, supervisorId) {
       return res.json({ status: Const.STATUS.OK,
-                        result: duty });
+                        result: { is_free: freeSlot, supervisor_id: supervisorId }});
     });
   });
 

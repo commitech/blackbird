@@ -30,40 +30,36 @@ module.exports = function(sequelize, DataTypes) {
   }, {
     classMethods: {
       getDuty: function(dutyId, callback) {
-        this.findOne({ where: { id: dutyId } }).then( function(duty) {
+        this.findById(dutyId).then( function(duty) {
           callback(duty);
         });
       },
 
       getSupervisorId: function(specificDuty, wagner, callback) {
-        this.findOne({ where: {id: specificDuty.duty_id}}).then( function(duty) {
-          var GrabbedDuty = wagner.invoke(function(GrabbedDuty) {
-            return GrabbedDuty;
-          });
-          GrabbedDuty.findAll({where: {duty_id: specificDuty.duty_id,
-                                       day: specificDuty.day,
-                                       month: specificDuty.month,
-                                       year: specificDuty.year}}).then(function(grabbed) {
-            var ReleasedDuty = wagner.invoke(function(ReleasedDuty) {
-              return ReleasedDuty;
-            });
-            ReleasedDuty.findAll({where: {duty_id: specificDuty.duty_id,
-                                       day: specificDuty.day,
-                                       month: specificDuty.month,
-                                       year: specificDuty.year}}).then(function(released) {
+        var GrabbedDuty = wagner.invoke(function(GrabbedDuty) {
+          return GrabbedDuty;
+        });
+        var ReleasedDuty = wagner.invoke(function(ReleasedDuty) {
+          return ReleasedDuty;
+        });
+
+        this.findById(specificDuty.duty_id).then( function(duty) {
+          GrabbedDuty.findAll({ where: specificDuty.dataValues }).then(function(grabbed) {
+            
+            ReleasedDuty.findAll({ where: specificDuty.dataValues }).then(function(released) {
               if (released.length == grabbed.length) {
                 if (grabbed.length == 0) {
                   // no release/grab yet. go back to original schedule
-                  callback(duty.dataValues.supervisor);
+                  callback(false, duty.dataValues.supervisor);
                 } else {
                   // check the latest grabbed entry.
-                  callback(grabbed[grabbed.length - 1].dataValues.supervisor_id);
+                  callback(false, grabbed[grabbed.length - 1].dataValues.supervisor_id);
                 }
               } else {
                 // released has more entries than grabbed. 
                 // duty has been released and not grabbed yet.
                 // return the negative of the last person who released
-                callback(-1 * released[released.length - 1].dataValues.supervisor_id);
+                callback(true, released[released.length - 1].dataValues.supervisor_id);
               }
             });
           });
@@ -71,22 +67,22 @@ module.exports = function(sequelize, DataTypes) {
       },
 
       grabDuty: function(user, specificDuty, grabRestriction, wagner, callbackOk, callbackError) {
-        this.getSupervisorId(specificDuty, wagner, function(supervisorId) {
-          if (supervisorId < 0) {
+        var GrabbedDuty = wagner.invoke(function(GrabbedDuty) {
+          return GrabbedDuty;
+        });
+
+        this.getSupervisorId(specificDuty, wagner, function(freeSlot, supervisorId) {
+          if (freeSlot) {
             // duty is free. released and not grabbed yet
-            var GrabbedDuty = wagner.invoke(function(GrabbedDuty) {
-              return GrabbedDuty;
-            });
-            GrabbedDuty.create({supervisor_id: user.id,
-                                       duty_id: specificDuty.duty_id,
-                                       day: specificDuty.day,
-                                       month: specificDuty.month,
-                                       year: specificDuty.year}).then(function(){
+
+            var grabbedDuty = specificDuty;
+            specificDuty.supervisor_id = user.id;
+
+            GrabbedDuty.create(grabbedDuty).then(function(){
               callbackOk();
-            },function(err){
+            }, function(err){
               console.log(err);
             });
-
           } else {
             // duty is not free.
             callbackError('Duty is not available for grab');
@@ -95,17 +91,18 @@ module.exports = function(sequelize, DataTypes) {
       },
 
       releaseDuty: function(user, specificDuty, wagner, callbackOk, callbackError) {
-        this.getSupervisorId(specificDuty, wagner, function(supervisorId) {
-          if (supervisorId == user.id) {
+        var ReleasedDuty = wagner.invoke(function(ReleasedDuty) {
+          return ReleasedDuty;
+        });
+
+        this.getSupervisorId(specificDuty, wagner, function(freeSlot, supervisorId) {
+          if (!freeSlot && supervisorId == user.id) {
             // duty is indeed belong to the user
-            var ReleasedDuty = wagner.invoke(function(ReleasedDuty) {
-              return ReleasedDuty;
-            });
-            ReleasedDuty.create({supervisor_id: user.id,
-                                       duty_id: specificDuty.duty_id,
-                                       day: specificDuty.day,
-                                       month: specificDuty.month,
-                                       year: specificDuty.year}).then(function(){
+            
+            var releasedDuty = specificDuty;
+            specificDuty.supervisor_id = user.id;
+
+            ReleasedDuty.create(releasedDuty).then(function(){
               callbackOk();
             },function(err){
               console.log(err);

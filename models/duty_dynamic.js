@@ -34,7 +34,7 @@ module.exports = function(sequelize, DataTypes) {
     grab_time: {
       type: DataTypes.DATE,
       allowNull: false,
-      defaultValue: 'CURRENT_TIMESTAMP'
+      defaultValue: sequelize.fn('NOW')
     },
     release_time: {
       type: DataTypes.DATE,

@@ -22,7 +22,7 @@ module.exports = function(sequelize, DataTypes) {
     timeline: {
       type: DataTypes.DATE,
       allowNull: false,
-      defaultValue: 'CURRENT_TIMESTAMP'
+      defaultValue: sequelize.fn('NOW')
     }
   });
 };
