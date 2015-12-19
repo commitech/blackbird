@@ -55,7 +55,6 @@ module.exports = function(wagner) {
       return res.json({ status: Const.STATUS.FAILED, 
                         comment: 'User is not specified' });
     }
-    console.log("DKSJKJSDA");
     Duty.releaseDuty(JSON.parse(req.query.user), JSON.parse(req.query.specific_duty), wagner, function() {
       return res.json({ status: Const.STATUS.OK});
     }, function(err) {
