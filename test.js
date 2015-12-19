@@ -5,6 +5,7 @@ var wagner = require('wagner-core');
 var passport = require('passport');
 var bodyparser = require('body-parser');
 var middleware = require('./middleware');
+var Const = require('./const');
 
 var URL_ROOT = 'http://localhost:3000';
 
@@ -29,7 +30,7 @@ describe("User API Tests", function() {
       extended: true
     }));
 
-    app.get(middleware.loggedInOnly);
+    app.get('*', middleware.loggedInOnly);
 
     app.use(require('./api/user')(wagner));
 
@@ -120,3 +121,82 @@ describe("User API Tests", function() {
   });
 
 });
+
+describe("Duty API test", function(){
+  var User;
+  var Duty;
+  var server;
+  var agent;
+
+  before(function() {
+    app = express();
+
+    require('./db')(wagner);
+    User = wagner.invoke(function(User) {
+      return User;
+    });
+    Duty = wagner.invoke(function(Duty) {
+      return Duty;
+    });
+
+    app.use(require('express-session')({ secret: 'keyboard cat', resave: true, saveUninitialized: true }));
+    app.use(passport.initialize());
+    app.use(passport.session());
+    app.use(bodyparser.json());
+    app.use(bodyparser.urlencoded({
+      extended: true
+    }));
+
+    app.get('*', middleware.loggedInOnly);
+
+    app.use(require('./api')(wagner));
+
+    server = app.listen(3000);
+
+    agent = superagent.agent();
+  });
+
+  after(function() {
+    server.close();
+  });
+
+  it('cannot fetch data without logging in', function(done) {
+    agent.get(URL_ROOT + '/duty/get_duty').end(function(err, res) {
+
+      assert.equal(res.status, 200);
+      var result;
+      assert.doesNotThrow(function() {
+        result = JSON.parse(res.text);
+      });
+      assert.equal(result.status, 'FAILED');
+      assert.equal(result.comment, Const.MESSAGE.NOT_LOGGED_IN);
+      done();
+    });
+  });
+
+  it('can fetch data', function(done) {
+    var loginUrl = URL_ROOT + '/user/login';
+    agent.post(loginUrl).send({
+      username: 'admin',
+      password: 'password'
+    }).end(function(){
+      agent.get(URL_ROOT + '/duty/get_duty?id=1').end(function(err, res) {
+        assert.equal(res.status, 200);
+        var result;
+        assert.doesNotThrow(function() {
+          result = JSON.parse(res.text);
+        });
+        assert.equal(result.status, 'OK');
+        assert.equal(result.result, {id: 1, 
+                                     day_name: 'Monday', 
+                                     start_time: '08:00:00',
+                                     end_time: '08:30:00',
+                                     location: 'yih'});
+        done();
+      });
+    });
+  });
+
+
+});
+
