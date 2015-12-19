@@ -3,39 +3,33 @@ var express = require('express');
 var superagent = require('superagent');
 var wagner = require('wagner-core');
 var passport = require('passport');
+var passportStub = require('passport-stub');
 var bodyparser = require('body-parser');
 var middleware = require('./middleware');
 var Const = require('./const');
 
-var URL_ROOT = 'http://localhost:3000';
+var URL_ROOT = 'http://localhost:3000/api/v1';
 
-describe("User API Tests", function() {
+describe("API Tests", function() {
   var User;
+  var Duty;
+  var GrabbedDuty;
+  var ReleasedDuty;
   var server;
   var agent;
 
   before(function() {
-    app = express();
 
-    require('./db')(wagner);
-    User = wagner.invoke(function(User) {
-      return User;
-    });
+    app = require('.').app;
+    models = require('.').models;
+    server = require('.').server;
 
-    app.use(require('express-session')({ secret: Const.APP.SECRET_KEY, resave: true, saveUninitialized: true }));
-    app.use(passport.initialize());
-    app.use(passport.session());
-    app.use(bodyparser.json());
-    app.use(bodyparser.urlencoded({
-      extended: true
-    }));
+    User = models.User;
+    Duty = models.Duty;
+    GrabbedDuty = models.GrabbedDuty;
+    ReleasedDuty = models.ReleasedDuty;
 
-    app.get('*', middleware.loggedInOnly);
-
-    app.use(require('./api')(wagner));
-
-    server = app.listen(3000);
-
+    passportStub.install(app);
     agent = superagent.agent();
   });
 
@@ -43,170 +37,116 @@ describe("User API Tests", function() {
     server.close();
   });
 
-  it('cannot login with invalid credentials', function(done) {
-    var url = URL_ROOT + '/user/login';
-    agent.post(url).send({
-      username: 'admin',
-      password: 'password2'
-    }).
-    end(function(err, res) {
+  afterEach(function() {
+    passportStub.logout();
+  })
 
-      var result;
-      assert.doesNotThrow(function() {
-        result = JSON.parse(res.text);
-      });
+  describe("User API Tests", function() {
 
-      assert.equal(result.status, 'FAILED');
-      done();
-    });
-  });
-
-  it('can login with valid credentials', function(done) {
-    var url = URL_ROOT + '/user/login';
-    agent.post(url).send({
-      username: 'admin',
-      password: 'password'
-    }).
-    end(function(err, res) {
-      assert.equal(res.status, 200);
-      var result;
-      assert.doesNotThrow(function() {
-        result = JSON.parse(res.text);
-      });
-
-      assert.equal(result.status, 'OK');
-      done();
-    });
-  });
-
-  it('connection persist after login', function(done) {
-    var url = URL_ROOT + '/user/login';
-    agent.post(url).send({
-      username: 'admin',
-      password: 'password'
-    }).
-    end(function(err, res) {
-      agent.get(URL_ROOT + '/user/me').end(function(err, res) {
-        assert.equal(res.status, 200);
-        var result;
+    it('cannot login with invalid credentials', function(done) {
+      var url = URL_ROOT + '/user/login';
+      agent.post(url).send({
+        username: 'admin',
+        password: 'password2'
+      }).
+      end(function(err, res) {
+        var json;
         assert.doesNotThrow(function() {
-          result = JSON.parse(res.text);
+          json = JSON.parse(res.text);
         });
 
-        assert.equal(result.status, 'OK');
-        assert.equal(result.user.name, 'admin');
+        assert.equal(json.status, 'FAILED');
         done();
       });
     });
-  });
 
-  it('can logout after login', function(done) {
-    var loginUrl = URL_ROOT + '/user/login';
-    agent.post(loginUrl).send({
-      username: 'admin',
-      password: 'password'
-    }).
-    end(function(err, res) {
+    it('can login with valid credentials', function(done) {
+      var url = URL_ROOT + '/user/login';
+      agent.post(url).send({
+        username: 'admin',
+        password: 'password'
+      }).
+      end(function(err, res) {
+        assert.equal(res.status, 200);
+        var json;
+        assert.doesNotThrow(function() {
+          json = JSON.parse(res.text);
+        });
+
+        assert.equal(json.status, 'OK');
+        done();
+      });
+    });
+
+    it('connection persist after login', function(done) {
+      passportStub.login({ name: 'admin' });
+
+      agent.get(URL_ROOT + '/user/me').end(function(err, res) {
+        assert.equal(res.status, 200);
+        var json;
+        assert.doesNotThrow(function() {
+          json = JSON.parse(res.text);
+        });
+
+        assert.equal(json.status, 'OK');
+        assert.equal(json.user.name, 'admin');
+        done();
+      });
+
+    });
+
+    it('can logout after login', function(done) {
+      passportStub.login({ name: 'admin' });
+
       var logoutUrl = URL_ROOT + '/user/logout';
       agent.get(logoutUrl).
       end(function(err, res) {
-        agent.get(URL_ROOT + '/user/me').end(function(err, res) {
-          assert.equal(res.status, 200);
-          var result;
-          assert.doesNotThrow(function() {
-            result = JSON.parse(res.text);
-          });
-          assert.equal(result.status, 'FAILED');
-          done();
-        });
-      });
-    });
-  });
-
-});
-
-describe("Duty API test", function(){
-  var User;
-  var Duty;
-  var server;
-  var agent;
-
-  before(function() {
-    app = express();
-
-    require('./db')(wagner);
-    User = wagner.invoke(function(User) {
-      return User;
-    });
-    Duty = wagner.invoke(function(Duty) {
-      return Duty;
-    });
-
-    app.use(require('express-session')({ secret: 'keyboard cat', resave: true, saveUninitialized: true }));
-    app.use(passport.initialize());
-    app.use(passport.session());
-    app.use(bodyparser.json());
-    app.use(bodyparser.urlencoded({
-      extended: true
-    }));
-
-    app.get('*', middleware.loggedInOnly);
-
-    app.use(require('./api')(wagner));
-
-    server = app.listen(3000);
-
-    agent = superagent.agent();
-  });
-
-  after(function() {
-    server.close();
-  });
-
-  it('cannot fetch data without logging in', function(done) {
-    agent.get(URL_ROOT + '/duty/get_duty').end(function(err, res) {
-
-      assert.equal(res.status, 200);
-      var result;
-      assert.doesNotThrow(function() {
-        result = JSON.parse(res.text);
-      });
-      assert.equal(result.status, 'FAILED');
-      assert.equal(result.comment, Const.MESSAGE.NOT_LOGGED_IN);
-      done();
-    });
-  });
-
-  it('can fetch data', function(done) {
-    var loginUrl = URL_ROOT + '/user/login';
-    agent.post(loginUrl).send({
-      username: 'admin',
-      password: 'password'
-    }).end(function(){
-      agent.get(URL_ROOT + '/duty/get_duty?id=1').end(function(err, res) {
-        assert.equal(res.status, 200);
-        var result;
-        assert.doesNotThrow(function() {
-          result = JSON.parse(res.text);
-        });
-        assert.equal(result.status, 'OK');
-        assert.equal(result.result.id, 1);
-        assert.equal(result.result.day_name, 'Monday');
-        assert.equal(result.result.start_time, '08:00:00');
-        assert.equal(result.result.end_time, '08:30:00');
-        assert.equal(result.result.location, 'yih');
+        assert.equal(res.user, null);
         done();
       });
     });
+
   });
 
-  it('can get supervisor ID', function(done) {
-    var loginUrl = URL_ROOT + '/user/login';
-    agent.post(loginUrl).send({
-      username: 'admin',
-      password: 'password'
-    }).end(function(){
-      agent.get(URL_ROOT + '/duty/get_supervisor_id?specific_duty={"duty_id":"1","day":1, "month":1, "year":1}').end(function(err, res) {
+  describe("Duty API test", function(){
+
+    it('cannot fetch data without logging in', function(done) {
+      agent.get(URL_ROOT + '/duty/get_duty').end(function(err, res) {
+        assert.equal(res.status, 200);
+        var json;
+        assert.doesNotThrow(function() {
+          json = JSON.parse(res.text);
+        });
+        assert.equal(json.status, 'FAILED');
+        assert.equal(json.comment, Const.MESSAGE.NOT_LOGGED_IN);
+        done();
+      });
+    });
+
+    it('can fetch data', function(done) {
+      passportStub.login({ name: 'admin' });
+      agent.get(URL_ROOT + '/duty/get_duty?id=1').end(function(err, res) {
+        assert.equal(res.status, 200);
+        var json;
+        assert.doesNotThrow(function() {
+          json = JSON.parse(res.text);
+        });
+        assert.equal(json.status, 'OK');
+        assert.equal(json.result.id, 1);
+        assert.equal(json.result.day_name, 'Monday');
+        assert.equal(json.result.start_time, '08:00:00');
+        assert.equal(json.result.end_time, '08:30:00');
+        assert.equal(json.result.location, 'yih');
+        done();
+      });
+    });
+
+    it('can get supervisor ID', function(done) {
+      passportStub.login({ name: 'admin' });
+
+      specificDuty = {duty_id: 1,day: 1, month: 1, year: 1};
+
+      agent.get(URL_ROOT + '/duty/get_supervisor_id?specific_duty=' + JSON.stringify(specificDuty)).end(function(err, res) {
         assert.equal(res.status, 200);
         var result;
         assert.doesNotThrow(function() {
@@ -217,16 +157,15 @@ describe("Duty API test", function(){
         assert.equal(result.result.supervisor_id, 1);
         done();
       });
-    });
-  })
+    })
 
-  it('cannot grab duty that is not free', function(done) {
-    var loginUrl = URL_ROOT + '/user/login';
-    agent.post(loginUrl).send({
-      username: 'admin',
-      password: 'password'
-    }).end(function(){
-      agent.get(URL_ROOT + '/duty/grab_duty?user={"id":"1"}&specific_duty={"duty_id":"1","day":1, "month":1, "year":1}').end(function(err, res) {
+    it('cannot grab duty that is not free', function(done) {
+      passportStub.login({ name: 'admin' });
+      
+      user = {id: 1};
+      specificDuty = {duty_id: 1,day: 1, month: 1, year: 1};
+
+      agent.get(URL_ROOT + '/duty/grab_duty?user=' + JSON.stringify(user) + '&specific_duty=' + JSON.stringify(specificDuty)).end(function(err, res) {
         assert.equal(res.status, 200);
         var result;
         assert.doesNotThrow(function() {
@@ -236,15 +175,14 @@ describe("Duty API test", function(){
         done();
       });
     });
-  });
 
-  it('cannot release duty that does not belong to the user', function(done) {
-    var loginUrl = URL_ROOT + '/user/login';
-    agent.post(loginUrl).send({
-      username: 'admin',
-      password: 'password'
-    }).end(function(){
-      agent.get(URL_ROOT + '/duty/release_duty?user={"id":"2"}&specific_duty={"duty_id":"1","day":1, "month":1, "year":1}').end(function(err, res) {
+    it('cannot release duty that does not belong to the user', function(done) {
+      passportStub.login({ name: 'admin' });
+
+      user = {id: 2};
+      specificDuty = {duty_id: 1,day: 1, month: 1, year: 1};
+
+      agent.get(URL_ROOT + '/duty/release_duty?user=' + JSON.stringify(user) + '&specific_duty=' + JSON.stringify(specificDuty)).end(function(err, res) {
         assert.equal(res.status, 200);
         var result;
         assert.doesNotThrow(function() {
@@ -254,64 +192,51 @@ describe("Duty API test", function(){
         done();
       });
     });
-  });
 
-  it('can release duty that belongs to the user', function(done) {
-    var loginUrl = URL_ROOT + '/user/login';
-    agent.post(loginUrl).send({
-      username: 'admin',
-      password: 'password'
-    }).end(function(){
-      agent.get(URL_ROOT + '/duty/release_duty?user={"id":"1"}&specific_duty={"duty_id":"1","day":1, "month":1, "year":1}').end(function(err, res) {
+    it('can release duty that belongs to the user', function(done) {
+      passportStub.login({ name: 'admin' });
+
+      user = {id: 1};
+      specificDuty = {duty_id: 1,day: 1, month: 1, year: 1};
+
+      agent.get(URL_ROOT + '/duty/release_duty?user=' + JSON.stringify(user) + '&specific_duty=' + JSON.stringify(specificDuty)).end(function(err, res) {
         assert.equal(res.status, 200);
         var result;
         assert.doesNotThrow(function() {
           result = JSON.parse(res.text);
         });
         assert.equal(result.status, 'OK');
-        agent.get(URL_ROOT + '/duty/get_supervisor_id?specific_duty={"duty_id":"1","day":1, "month":1, "year":1}').end(function(err, res) {
-          assert.equal(res.status, 200);
-          var result;
-          assert.doesNotThrow(function() {
-            result = JSON.parse(res.text);
-          });
-          assert.equal(result.status, 'OK');
-          assert.equal(result.result.is_free, true);
-          assert.equal(result.result.supervisor_id, 1);
+
+        Duty.getSupervisorId(specificDuty, function(freeSlot, supervisorId) {
+          assert.equal(freeSlot, true);
+          assert.equal(supervisorId, 1);
           done();
         });
+
       });
     });
-  });
 
-it('can grab duty that is free', function(done) {
-    var loginUrl = URL_ROOT + '/user/login';
-    agent.post(loginUrl).send({
-      username: 'admin',
-      password: 'password'
-    }).end(function(){
-      agent.get(URL_ROOT + '/duty/grab_duty?user={"id":"1"}&specific_duty={"duty_id":"1","day":1, "month":1, "year":1}').end(function(err, res) {
+    it('can grab duty that is free', function(done) {
+      passportStub.login({ name: 'admin' });
+
+      user = {id: 1};
+      specificDuty = {duty_id: 1,day: 1, month: 1, year: 1};
+
+      agent.get(URL_ROOT + '/duty/grab_duty?user=' + JSON.stringify(user) + '&specific_duty=' + JSON.stringify(specificDuty)).end(function(err, res) {
         assert.equal(res.status, 200);
         var result;
         assert.doesNotThrow(function() {
           result = JSON.parse(res.text);
         });
         assert.equal(result.status, 'OK');
-        agent.get(URL_ROOT + '/duty/get_supervisor_id?specific_duty={"duty_id":"1","day":1, "month":1, "year":1}').end(function(err, res) {
-          assert.equal(res.status, 200);
-          var result;
-          assert.doesNotThrow(function() {
-            result = JSON.parse(res.text);
-          });
-          assert.equal(result.status, 'OK');
-          assert.equal(result.result.is_free, false);
-          assert.equal(result.result.supervisor_id, 1);
-          
+        
+        Duty.getSupervisorId({duty_id: 1,day: 1, month: 1, year: 1}, function(freeSlot, supervisorId) {
+          assert.equal(freeSlot, false);
+          assert.equal(supervisorId, 1);
           done();
         });
+
       });
     });
   });
-
 });
-

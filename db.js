@@ -38,4 +38,5 @@ module.exports = function(wagner) {
     });
   });
   
+  return models;
 }

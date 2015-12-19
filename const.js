@@ -5,8 +5,8 @@ exports.APP = {
 exports.DB = {
   NAME: 'commitech',
   USERNAME: 'root',
-  PASSWORD: 'root',
-  HOST: '54.169.17.107'
+  PASSWORD: '',
+  HOST: 'localhost'
 }
 
 exports.STATUS = {

@@ -5,19 +5,22 @@ var bodyparser = require('body-parser');
 var middleware = require('./middleware');
 var Const = require('./const');
 
-require('./db')(wagner);
+exports.models = require('./db')(wagner);
 
-var app = express();
+var app = exports.app = express();
 
-// Middleware
+// Session middleware
 app.use(require('express-session')({ secret: Const.APP.SECRET_KEY, resave: true, saveUninitialized: true }));
+// Auth middleware
 app.use(passport.initialize());
 app.use(passport.session());
+// Body parser middleware
 app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({ extended: true }));
+// Logged in middleware
 app.get('*', middleware.loggedInOnly);
 
 app.use('/api/v1', require('./api')(wagner));
 
-app.listen(3000);
+exports.server = app.listen(3000);
 console.log('Listening on port 3000!');

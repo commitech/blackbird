@@ -56,6 +56,7 @@ module.exports = function(wagner) {
 
   api.get('/logout', function(req, res) {
     req.logout();
+    req.session.destroy();
     return res.json({ status: Const.STATUS.OK });
   });
 
