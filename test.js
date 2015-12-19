@@ -22,7 +22,7 @@ describe("User API Tests", function() {
       return User;
     });
 
-    app.use(require('express-session')({ secret: 'keyboard cat', resave: true, saveUninitialized: true }));
+    app.use(require('express-session')({ secret: Const.APP.SECRET_KEY, resave: true, saveUninitialized: true }));
     app.use(passport.initialize());
     app.use(passport.session());
     app.use(bodyparser.json());
