@@ -73,5 +73,39 @@ module.exports = function(wagner) {
     });
   });
 
+  api.get('/assign_temporary_duty', userMiddleware.adminOnly, dutyMiddleware.userRequired, dutyMiddleware.specificDutyRequired, function(req, res) {
+    Duty.assignSpecificDuty(JSON.parse(req.query.user), JSON.parse(req.query.specific_duty), function() {
+      return res.json({ status: Const.STATUS.OK});
+    }, function(err) {
+      return res.json({ status: Const.STATUS.FAILED, comment: err });
+    });
+  });
+
+  api.get('/assign_temporary_duties', userMiddleware.adminOnly, dutyMiddleware.userRequired, dutyMiddleware.specificDutiesRequired, function(req, res) {
+    Duty.assignSpecificDuties(JSON.parse(req.query.user), JSON.parse(req.query.specific_duties), function() {
+      return res.json({ status: Const.STATUS.OK});
+    }, function(err) {
+      return res.json({ status: Const.STATUS.FAILED, comment: err });
+    });
+  });
+
+  api.get('/get_duty_schedule', dutyMiddleware.dayRequired, dutyMiddleware.monthRequired, dutyMiddleware.yearRequired, function(req, res) {
+    Duty.getDutySchedule(req.query.day, req.query.month, req.query.year, function(schedules) {
+      return res.json({ status: Const.STATUS.OK,
+                        result: schedules});
+    }, function(err) {
+      return res.json({ status: Const.STATUS.FAILED, comment: err });
+    });
+  });
+
+  api.get('/get_original_duty_schedule', dutyMiddleware.dayNameRequired, function(req, res) {
+    Duty.getOriginalDutySchedule(req.query.day_name, function(schedules) {
+      return res.json({ status: Const.STATUS.OK,
+                        result: schedules});
+    }, function(err) {
+      return res.json({ status: Const.STATUS.FAILED, comment: err });
+    });
+  });
+
   return api;
 }

@@ -114,7 +114,6 @@ describe("Duty API test", function(){
     passportStub.login({ name: 'admin' });
 
     user = {id: 1};
-    specificDuty = {duty_id: 1,day: 1, month: 1, year: 1};
 
     agent.get(URL_ROOT + '/release_duty?user=' + JSON.stringify(user) + '&specific_duty=' + JSON.stringify(specificDuty)).end(function(err, res) {
       assert.equal(res.status, 200);
@@ -124,10 +123,16 @@ describe("Duty API test", function(){
       });
       assert.equal(json.status, 'OK');
 
+      specificDuty = {duty_id: 1,day: 1, month: 1, year: 1};
       Duty.getSupervisorId(specificDuty, function(freeSlot, supervisorId) {
         assert.equal(freeSlot, true);
         assert.equal(supervisorId, 1);
-        done();
+        specificDuty = {duty_id: 2,day: 1, month: 1, year: 1};
+        Duty.getSupervisorId(specificDuty, function(freeSlot, supervisorId) {
+          assert.equal(freeSlot, false);
+          assert.equal(supervisorId, 1);
+          done();
+        });
       });
 
     });

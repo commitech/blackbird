@@ -44,9 +44,15 @@ module.exports = function(sequelize, DataTypes) {
         });
 
         this.findById(specificDuty.duty_id).then( function(duty) {
-          GrabbedDuty.findAll({ where: specificDuty.dataValues }).then(function(grabbed) {
+          GrabbedDuty.findAll({ where: {duty_id: specificDuty.duty_id,
+                                        day: specificDuty.day,
+                                        month: specificDuty.month,
+                                        year: specificDuty.year }}).then(function(grabbed) {
             
-            ReleasedDuty.findAll({ where: specificDuty.dataValues }).then(function(released) {
+            ReleasedDuty.findAll({ where: {duty_id: specificDuty.duty_id,
+                                          day: specificDuty.day,
+                                          month: specificDuty.month,
+                                          year: specificDuty.year }}).then(function(released) {
               if (released.length == grabbed.length) {
                 if (grabbed.length == 0) {
                   // no release/grab yet. go back to original schedule
@@ -94,7 +100,7 @@ module.exports = function(sequelize, DataTypes) {
       grabDuties: function(user, specificDuties, grabRestriction, callbackOk, callbackError) {
         var totalGrabbedDuties = 0;
         specificDuties.forEach(function(specificDuty) {
-          grabDuty(user, specificDuty, grabRestriction, function(){
+          this.grabDuty(user, specificDuty, grabRestriction, function(){
             ++totalGrabbedDuties;
             if (totalGrabbedDuties == specificDuties.length) {
               callbackOk();
@@ -132,7 +138,7 @@ module.exports = function(sequelize, DataTypes) {
       releaseDuties: function(user, specificDuties, callbackOk, callbackError) {
         var totalReleaseDuties = 0;
         specificDuties.forEach(function(specificDuty) {
-          releaseDuty(user, specificDuty, function() {
+          this.releaseDuty(user, specificDuty, function() {
             ++totalReleaseDuties;
             if (totalReleaseDuties == specificDuties.length) {
               callbackOk();
@@ -155,7 +161,7 @@ module.exports = function(sequelize, DataTypes) {
       assignPermanentDuties: function(user, duties, callbackOk, callbackError) {
         var totalAssignedDuties = 0;
         duties.forEach(function(duty) {
-          assignPermanentDuty(user, duty, function() {
+          this.assignPermanentDuty(user, duty, function() {
             ++totalAssignedDuties;
             if (totalAssignedDuties == duties.length) {
               callbackOk();
@@ -164,6 +170,85 @@ module.exports = function(sequelize, DataTypes) {
             callbackError(err);
           })
         });
+      },
+
+      assignTemporaryDuty: function(user, specificDuty, callbackOk, callbackError) {
+        this.getSupervisorId(specificDuty, function(isFree, supervisorId) {
+          if (!isFree) {
+            releaseDuty({id: supervisorId}, specificDuty, function() {
+              grabDuty(user, specificDuty, function() {
+                callbackOk();
+              }, function(err) {
+                callbackError(err);
+              })
+            }, function(err) {
+              callbackError(err);
+            });
+          } else {
+            grabDuty(user, specificDuty, function() {
+              callbackOk();
+            }, function(err) {
+              callbackError(err);
+            })
+          }
+        });
+      },
+
+      assignTemporaryDuties: function(user, specificDuties, callbackOk, callbackError) {
+        var totalAssignedDuties = 0;
+        specificDuties.forEach(function(specificDuty) {
+          this.assignTemporaryDuty(user, specificDuty, function() {
+            ++totalAssignedDuties;
+            if (totalAssignedDuties == specificDuties.length) {
+              callbackOk();
+            }
+          }, function(err) {
+            callbackError(err);
+          })
+        });
+      },
+
+      getDutySchedule: function(day, month, year, callbackOk, callbackError) {
+        var date = new Date(year, month - 1, day);
+        var Const = require('../const.js');
+        var day_name = Const.DAY_NAME[date.getDay()];
+        var that = this;
+        this.getOriginalDutySchedule(day_name, function(schedules) {
+          var changedSchedule = 0;
+          schedules.forEach(function(schedule) {
+            var specificDuty = {duty_id: schedule.duty_id,
+                              day: day,
+                              month: month,
+                              year: year};
+            that.getSupervisorId(specificDuty, function(isFree, supervisorId) {
+              schedule.is_free = isFree;
+              schedule.supervisor_id = supervisorId;
+              ++changedSchedule;
+              if (changedSchedule == schedules.length) {
+                callbackOk(schedules);
+              }
+            });
+          });
+        }, function(err) {
+          callbackError(err);
+        });
+      },
+
+      getOriginalDutySchedule: function(day_name, callbackOk, callbackError) {
+        this.findAll({where: {day_name: day_name}}).then(function(schedules) {
+          var scheduleArray = new Array();
+          schedules.forEach(function(schedule) {
+            scheduleArray.push({duty_id: schedule.dataValues.id,
+                                supervisor_id: schedule.dataValues.supervisor});
+          })
+          callbackOk(scheduleArray);
+        }, function(err) {
+          callbackError(err);
+        });
+      },
+
+      getFreeDuties: function(day, month, year, location) {
+        // TODO
       }
     }
   });

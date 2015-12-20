@@ -8,7 +8,7 @@ exports.dutyRequired = function(req, res, next) {
   next();
 }
 
-exports.dutiesRequired = function(req, res, next) {
+exports.dutiesRequired = function(req, res, next) { 
   if (!req.query.duties) {
     return res.json({ status: Const.STATUS.FAILED, 
                       comment: 'Duties is not specified' });
@@ -29,6 +29,38 @@ exports.specificDutiesRequired = function(req, res, next) {
   if (!req.query.specific_duties) {
     return res.json({ status: Const.STATUS.FAILED, 
                       comment: 'Specific duties is not specified' });
+  }
+  next();
+}
+
+exports.dayRequired = function(req, res, next) {
+  if (!req.query.day) {
+    return res.json({ status: Const.STATUS.FAILED, 
+                      comment: 'Day is not specified' });
+  }
+  next();
+}
+
+exports.monthRequired = function(req, res, next) {
+  if (!req.query.month) {
+    return res.json({ status: Const.STATUS.FAILED, 
+                      comment: 'Month is not specified' });
+  }
+  next();
+}
+
+exports.yearRequired = function(req, res, next) {
+  if (!req.query.year) {
+    return res.json({ status: Const.STATUS.FAILED, 
+                      comment: 'Year is not specified' });
+  }
+  next();
+}
+
+exports.dayNameRequired = function(req, res, next) {
+  if (!req.query.day_name) {
+    return res.json({ status: Const.STATUS.FAILED, 
+                      comment: 'Day name is not specified' });
   }
   next();
 }
