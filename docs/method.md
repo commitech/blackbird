@@ -106,7 +106,7 @@ Parameter :
 
 Returns the array of supervisor ID which originally (not after grab/release) duties on the parameter day, sorted from the earlist to latest.
 
-### duty/get_available_duties
+### duty/get_free_duties
 
 Parameter : 
 
@@ -118,13 +118,13 @@ Parameter :
 
 `location` : String.
 
-Returns the list of available (released but not grabbed yet) duties on the parameter day
+Returns the list of free (released but not grabbed yet) duties on the parameter day
 
-### duty/get_available_duties
+### duty/get_free_duties
 
 No parameter.
 
-Returns the list of all available (released but not grabbed yet) duties.
+Returns the list of all free (released but not grabbed yet) duties.
 
 
 
