@@ -96,7 +96,7 @@ Parameter :
 
 `year` : Integer.
 
-Returns the array of supervisor ID which duties on the parameter day, sorted from the earliest to latest.
+Returns the array of supervisor ID which duties on the parameter day, sorted from the earliest to latest. Each element in the array is an object consisting of `duty_id`, `supervisor_id`, and `is_free`.
 
 ### duty/get_original_duty_schedule
 
@@ -104,7 +104,7 @@ Parameter :
 
 `day_name` : String.
 
-Returns the array of supervisor ID which originally (not after grab/release) duties on the parameter day, sorted from the earlist to latest.
+Returns the array of supervisor ID which originally (not after grab/release) duties on the parameter day, sorted from the earlist to latest. Each element in the array is an object consisting of `duty_id`, `supervisor_id`.
 
 ### duty/get_free_duties
 
@@ -118,20 +118,25 @@ Parameter :
 
 `location` : String.
 
-Returns the list of free (released but not grabbed yet) duties on the parameter day
+Returns the array of `duty_id` that is free (released but not grabbed yet) duties on the parameter day. 
 
-### duty/get_free_duties
+### duty/get_all_free_duties
 
 No parameter.
 
-Returns the list of all free (released but not grabbed yet) duties.
-
+Returns the array of `specific_duty` that is free (released but not grabbed yet) duties. 
 
 
 
 
 
 ## User
+
+### user/me
+
+No parameter
+
+Returns the user object that is currently logged in.
 
 ### user/get_user
 
