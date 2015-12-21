@@ -5,6 +5,7 @@ var bodyparser = require('body-parser');
 var Const = require('./const');
 
 exports.models = require('./db')(wagner);
+exports.wagner = wagner;
 
 var app = exports.app = express();
 

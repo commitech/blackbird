@@ -2,6 +2,7 @@ var assert = require('assert');
 var express = require('express');
 var superagent = require('superagent');
 var passportStub = require('passport-stub');
+var sequelizeFixtures = require('sequelize-fixtures');
 var Const = require('../const');
 
 var URL_ROOT = 'http://localhost:3000/api/v1/user';
@@ -11,16 +12,28 @@ describe("User API Tests", function() {
   var server;
   var agent;
 
-  before(function() {
-
+  before(function(done) {
+    wagner = require('../').wagner;
     app = require('../').app;
     models = require('../').models;
     server = require('../').server;
+    db = wagner.invoke(function(db) {
+      return db;
+    });
 
     User = models.User;
 
     passportStub.install(app);
     agent = superagent.agent();
+
+    db.sync({ force: true }).then(function(e) {
+      sequelizeFixtures.loadFile('fixtures/*.json', models).then(function() {
+        done();
+      });
+    }, function(err) {
+      console.log(err);
+    });
+    
   });
 
   afterEach(function() {

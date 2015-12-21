@@ -71,7 +71,7 @@ module.exports = function(sequelize, DataTypes) {
     updated_at: {
       type: DataTypes.DATE,
       allowNull: false,
-      defaultValue: '0000-00-00 00:00:00'
+      defaultValue: sequelize.fn('NOW')
     }
   }, {
     instanceMethods: {

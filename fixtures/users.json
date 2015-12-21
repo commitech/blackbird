@@ -1,0 +1,102 @@
+[
+  {
+    "model": "User",
+    "data": {
+      "id": "1",
+      "name": "admin",
+      "matric_number": "imnotastudent",
+      "contact": "67736398",
+      "password": "5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8",
+      "email": "operations@nussucommit.com",
+      "is_admin": "1",
+      "cell": "Presidential",
+      "position": "Manager",
+      "status": "1",
+      "tracking": "0",
+      "is_duty": "1",
+      "is_notification": "0",
+      "created_at": "2015-07-26 01:08:34",
+      "updated_at": "2015-07-26 01:08:34"
+    }
+  },
+  {
+    "model": "User",
+    "data": {
+      "id": "2",
+      "name": "mctest",
+      "matric_number": "0",
+      "contact": "911",
+      "password": "5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8",
+      "email": "commitech@mailinator.com",
+      "is_admin": "0",
+      "cell": "Presidential",
+      "position": "Treasurer",
+      "status": "1",
+      "tracking": "treasurer",
+      "is_duty": "1",
+      "is_notification": "1",
+      "created_at": "2015-07-26 01:08:34",
+      "updated_at": "2015-07-26 01:08:34"
+    }
+  },
+  {
+    "model": "User",
+    "data": {
+      "id": "3",
+      "name": "nonmctest",
+      "matric_number": "1",
+      "contact": "911",
+      "password": "5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8",
+      "email": "commitech@mailinator.com",
+      "is_admin": "0",
+      "cell": "Marketing",
+      "position": "Subcom",
+      "status": "0",
+      "tracking": "0",
+      "is_duty": "1",
+      "is_notification": "1",
+      "created_at": "2015-07-26 01:08:34",
+      "updated_at": "2015-07-26 01:08:34"
+    }
+  },
+  {
+    "model": "User",
+    "data": {
+      "id": "248",
+      "name": "comcen",
+      "matric_number": "NULL",
+      "contact": "NULL",
+      "password": "a3ca439f8a6de7664f43165552db1442fe0e941d",
+      "email": "",
+      "is_admin": "0",
+      "cell": "none",
+      "position": "Subcom",
+      "status": "1",
+      "tracking": "comcen",
+      "is_duty": "0",
+      "is_notification": "0",
+      "created_at": "2015-07-26 01:08:34",
+      "updated_at": "2015-07-26 01:08:34"
+    }
+  },
+  {
+    "model": "User",
+    "data": {
+      "id": "249",
+      "name": "nonmctest2",
+      "matric_number": "2",
+      "contact": "911",
+      "password": "72cfa1cba894045d0fbc1a5282ce622740a5e88d",
+      "email": "commitech@mailinator.com",
+      "is_admin": "0",
+      "cell": "Marketing",
+      "position": "Subcom",
+      "status": "1",
+      "tracking": "0",
+      "is_duty": "1",
+      "is_notification": "0",
+      "created_at": "2015-07-26 01:08:34",
+      "updated_at": "2015-07-26 01:08:34"
+    }
+  }
+]

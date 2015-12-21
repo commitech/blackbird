@@ -1,0 +1,24 @@
+[
+  {
+    "model": "Duty",
+    "data": {
+      "id": "1",
+      "day_name": "Monday",
+      "start_time": "08:00:00",
+      "end_time": "08:30:00",
+      "location": "yih",
+      "supervisor": "1"
+    }
+  },
+  {
+    "model": "Duty",
+    "data": {
+      "id": "2",
+      "day_name": "Monday",
+      "start_time": "08:00:00",
+      "end_time": "08:30:00",
+      "location": "yih",
+      "supervisor": "1"
+    }
+  }
+]

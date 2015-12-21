@@ -39,7 +39,7 @@ module.exports = function(sequelize, DataTypes) {
     release_time: {
       type: DataTypes.DATE,
       allowNull: false,
-      defaultValue: '0000-00-00 00:00:00'
+      defaultValue: sequelize.fn('NOW')
     },
     grabbed: {
       type: DataTypes.INTEGER(11),
