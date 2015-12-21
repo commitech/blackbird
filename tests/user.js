@@ -4,10 +4,12 @@ var superagent = require('superagent');
 var passportStub = require('passport-stub');
 var sequelizeFixtures = require('sequelize-fixtures');
 var Const = require('../const');
+var config = require('../config');
 
 var URL_ROOT = 'http://localhost:3000/api/v1/user';
 
 describe("User API Tests", function() {
+  config.APP.STAGE = 'TESTING';
   var User;
   var server;
   var agent;
