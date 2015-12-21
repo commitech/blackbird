@@ -1,5 +1,7 @@
 /* jshint indent: 2 */
 
+var _ = require('underscore');
+
 module.exports = function(sequelize, DataTypes) {
   return sequelize.define('duty', {
     id: {
@@ -44,15 +46,9 @@ module.exports = function(sequelize, DataTypes) {
         });
 
         this.findById(specificDuty.duty_id).then( function(duty) {
-          GrabbedDuty.findAll({ where: {duty_id: specificDuty.duty_id,
-                                        day: specificDuty.day,
-                                        month: specificDuty.month,
-                                        year: specificDuty.year }}).then(function(grabbed) {
+          GrabbedDuty.findAll({ where: _.pick(specificDuty, 'duty_id', 'day', 'month', 'year') }).then(function(grabbed) {
             
-            ReleasedDuty.findAll({ where: {duty_id: specificDuty.duty_id,
-                                          day: specificDuty.day,
-                                          month: specificDuty.month,
-                                          year: specificDuty.year }}).then(function(released) {
+            ReleasedDuty.findAll({ where: _.pick(specificDuty, 'duty_id', 'day', 'month', 'year') }).then(function(released) {
               if (released.length == grabbed.length) {
                 if (grabbed.length == 0) {
                   // no release/grab yet. go back to original schedule
@@ -81,7 +77,7 @@ module.exports = function(sequelize, DataTypes) {
             // duty is free. released and not grabbed yet
 
             var grabbedDuty = specificDuty;
-            specificDuty.supervisor_id = user.id;
+            grabbedDuty.supervisor_id = user.id;
 
             // TODO : Check for grabRestriction.
 
@@ -151,7 +147,7 @@ module.exports = function(sequelize, DataTypes) {
 
       assignPermanentDuty: function(user, duty, callbackOk, callbackError) {
         // TODO : Remove all grab / release activity that involves this duty ID.
-        this.update({supervisor:user.id},{where:{id:duty.id}}).then(function(){
+        this.update({ supervisor: user.id }, { where: { id: duty.id } }).then(function(){
           callbackOk();
         },function(err){
           callbackError(err);
@@ -175,7 +171,7 @@ module.exports = function(sequelize, DataTypes) {
       assignTemporaryDuty: function(user, specificDuty, callbackOk, callbackError) {
         this.getSupervisorId(specificDuty, function(isFree, supervisorId) {
           if (!isFree) {
-            releaseDuty({id: supervisorId}, specificDuty, function() {
+            releaseDuty({ id: supervisorId }, specificDuty, function() {
               grabDuty(user, specificDuty, function() {
                 callbackOk();
               }, function(err) {
@@ -235,7 +231,7 @@ module.exports = function(sequelize, DataTypes) {
       },
 
       getOriginalDutySchedule: function(day_name, callbackOk, callbackError) {
-        this.findAll({where: {day_name: day_name}}).then(function(schedules) {
+        this.findAll({ where: { day_name: day_name } }).then(function(schedules) {
           var scheduleArray = new Array();
           schedules.forEach(function(schedule) {
             scheduleArray.push({duty_id: schedule.dataValues.id,
