@@ -69,39 +69,39 @@ module.exports = function(wagner) {
     User.getUser(req.query.id, function(user) {
       return res.json({ status: Const.STATUS.OK, result: user});
     }, function(err) {
-      return res.json({ status: Const.STATUS.OK, comment: err});
+      return res.json({ status: Const.STATUS.FAILED, comment: err});
     });
   });
 
   api.get('/add_user', userMiddleware.adminOnly, userMiddleware.userRequired, userMiddleware.passwordRequired, function(req, res) {
-    User.addUser(req.query.user, req.query.password, function() {
-      return res.json({ status: Const.STATUS.OK });
+    User.addUser(JSON.parse(req.query.user), req.query.password, function(id) {
+      return res.json({ status: Const.STATUS.OK, result: id});
     }, function(err) {
-      return res.json({ status: Const.STATUS.OK, comment: err});
+      return res.json({ status: Const.STATUS.FAILED, comment: err});
     });
   });
 
   api.get('/remove_user', userMiddleware.adminOnly, userMiddleware.userRequired, function(req, res) {
-    User.removeUser(req.query.user, function() {
+    User.removeUser(JSON.parse(req.query.user), function() {
       return res.json({ status: Const.STATUS.OK });
     }, function(err) {
-      return res.json({ status: Const.STATUS.OK, comment: err});
+      return res.json({ status: Const.STATUS.FAILED, comment: err});
     });
   });
 
   api.get('/edit_user', userMiddleware.userRequired, function(req, res) {
-    User.editUser(req.query.user, function() {
+    User.editUser(JSON.parse(req.query.user), function() {
       return res.json({ status: Const.STATUS.OK });
     }, function(err) {
-      return res.json({ status: Const.STATUS.OK, comment: err});
+      return res.json({ status: Const.STATUS.FAILED, comment: err});
     });
   });
 
   api.get('/edit_password', userMiddleware.userRequired, userMiddleware.passwordRequired, function(req, res) {
-    User.editPassword(req.query.user, req.query.password, function() {
+    User.editPassword(JSON.parse(req.query.user), req.query.password, function() {
       return res.json({ status: Const.STATUS.OK });
     }, function(err) {
-      return res.json({ status: Const.STATUS.OK, comment: err});
+      return res.json({ status: Const.STATUS.FAILED, comment: err});
     });
   });
 
@@ -109,7 +109,7 @@ module.exports = function(wagner) {
     User.getAllUsers(function(users) {
       return res.json({ status: Const.STATUS.OK, result: users});
     }, function(err) {
-      return res.json({ status: Const.STATUS.OK, comment: err});
+      return res.json({ status: Const.STATUS.FAILED, comment: err});
     });
   });
 
@@ -117,7 +117,7 @@ module.exports = function(wagner) {
     User.getNotifyUsers(function(users) {
       return res.json({ status: Const.STATUS.OK, result: users});
     }, function(err) {
-      return res.json({ status: Const.STATUS.OK, comment: err});
+      return res.json({ status: Const.STATUS.FAILED, comment: err});
     });
   });
 

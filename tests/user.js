@@ -122,6 +122,47 @@ describe("User API Tests", function() {
     });
   });
 
-  it('can add user')
+  it('can get all users', function(done) {
+    passportStub.login({ name: 'admin', is_admin: true});
+    agent.get(URL_ROOT + '/get_all_users').end(function(err, res) {
+      assert.equal(res.status, 200);
+      var json;
+      assert.doesNotThrow(function() {
+        json = JSON.parse(res.text);
+      });
+      assert.equal(json.status, 'OK');
+      assert.equal(json.result.length, 5);
+      done();
+    });
+  })
+
+  it('can add user', function(done) {
+    passportStub.login({ name: 'admin', is_admin: true});
+    user = {name: "test2",
+            matric_number: "a0a020",
+            contact: "12345678",
+            email: "haha@haha",
+            cell: "jail",
+            position: "centreback"};
+    agent.get(URL_ROOT + '/add_user?user=' + JSON.stringify(user) + '&password=gajah').end(function(err, res) {
+      assert.equal(res.status, 200);
+      var json;
+      assert.doesNotThrow(function() {
+        json = JSON.parse(res.text);
+      });
+      assert.equal(json.status, 'OK');
+      assert.equal(json.result, 6);
+      agent.get(URL_ROOT + '/get_all_users').end(function(err, res) {
+        assert.equal(res.status, 200);
+        var json;
+        assert.doesNotThrow(function() {
+          json = JSON.parse(res.text);
+        });
+        assert.equal(json.status, 'OK');
+        assert.equal(json.result.length, 6);
+        done();
+      });
+    });
+  })
 
 });

@@ -5,7 +5,8 @@ module.exports = function(sequelize, DataTypes) {
     id: {
       type: DataTypes.INTEGER(11),
       allowNull: false,
-      primaryKey: true
+      primaryKey: true,
+      autoIncrement: true
     },
     name: {
       type: DataTypes.STRING,
@@ -103,8 +104,8 @@ module.exports = function(sequelize, DataTypes) {
         var shasum = crypto.createHash('sha1');
         shasum.update(unHashedPassword);
         user.password = shasum.digest('hex');
-        this.create(user).then( function() {
-          callbackOk();
+        this.create(user).then( function(user) {
+          callbackOk(user.dataValues.id);
         }, function(err) {
           callbackError(err);
         });

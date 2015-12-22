@@ -154,6 +154,8 @@ Parameter :
 
 `password` : String. The unhashed password for the user.
 
+Returns the `id` of the new user.
+
 ### user/remove_user
 
 Parameter :

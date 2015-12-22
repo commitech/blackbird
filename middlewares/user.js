@@ -33,7 +33,7 @@ exports.userRequired = function(req, res, next) {
 }
 
 exports.passwordRequired = function(req, res, next) {
-  if (!req.query.user) {
+  if (!req.query.password) {
     return res.json({ status: Const.STATUS.FAILED, 
                       comment: 'Password is not specified' });
   }

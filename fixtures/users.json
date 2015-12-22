@@ -62,7 +62,7 @@
   {
     "model": "User",
     "data": {
-      "id": "248",
+      "id": "4",
       "name": "comcen",
       "matric_number": "NULL",
       "contact": "NULL",
@@ -82,7 +82,7 @@
   {
     "model": "User",
     "data": {
-      "id": "249",
+      "id": "5",
       "name": "nonmctest2",
       "matric_number": "2",
       "contact": "911",
