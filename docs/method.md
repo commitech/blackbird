@@ -205,3 +205,70 @@ Parameter :
 ### user/logout
 
 No parameter
+
+
+
+
+## Announcement
+
+### announcement/get_announcement
+
+Parameter :
+
+`id` : Integer.
+
+Returns an announcement object `return` that has the property `return.id = id`
+
+### announcement/get_all_announcement
+
+No parameter
+
+Returns an array of announcement objects of all announcements
+
+### announcement/add_announcement
+
+Parameter :
+
+`announcement` : Announcement object. Required parameter : `title`, `content`.
+
+Returns the `id` of the new announcement.
+
+### announcement/edit_announcement
+
+Parameter :
+
+`announcement` : Announcement object. Required parameter : `id`. Optional parameter (only those parameter to change) : `title`, `content`.
+
+### announcement/remove_announcement
+
+Parameter :
+
+`announcement` : Announcement object. Required parameter : `id`
+
+
+
+## Sign
+
+### sign/get_sign
+
+Parameter :
+
+`id` : Integer.
+
+Returns a sign object `return` that has the property `return.id = id`
+
+### sign/get_all_sign
+
+No parameter
+
+Returns an array of sign objects of all signs
+
+### sign/add_sign
+
+Parameter :
+
+`sign` : Sign object. Required parameter : `supervisor_id`, `location`, `sign_type`.
+
+Returns the `id` of the new sign.
+
+
