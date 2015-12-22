@@ -88,7 +88,7 @@ describe("User API Tests", function() {
       });
 
       assert.equal(json.status, 'OK');
-      assert.equal(json.user.name, 'admin');
+      assert.equal(json.result.name, 'admin');
       done();
     });
 
@@ -104,5 +104,24 @@ describe("User API Tests", function() {
       done();
     });
   });
+
+  it('can fetch data from a specific user', function(done) {
+    passportStub.login({ name: 'admin' });
+
+    agent.get(URL_ROOT + '/get_user?id=2').end(function(err, res) {
+      assert.equal(res.status, 200);
+      var json;
+      assert.doesNotThrow(function() {
+        json = JSON.parse(res.text);
+      });
+
+      assert.equal(json.status, 'OK');
+      assert.equal(json.result.id, 2);
+      assert.equal(json.result.name, 'mctest');
+      done();
+    });
+  });
+
+  it('can add user')
 
 });

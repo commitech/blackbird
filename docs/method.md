@@ -142,9 +142,9 @@ Returns the user object that is currently logged in.
 
 Parameter :
 
-`user` : User object. Requried parameter : `id`
+`id` : Integer.
 
-Returns the user object `return` that has the property `return.id = user.id`
+Returns the user object `return` that has the property `return.id = id`
 
 ### user/add_user
 

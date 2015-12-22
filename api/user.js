@@ -3,6 +3,7 @@ var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 
 var Const = require('../const');
+var userMiddleware = require('../middlewares/user');
 
 module.exports = function(wagner) {
   var api = express.Router();
@@ -61,7 +62,63 @@ module.exports = function(wagner) {
   });
 
   api.get('/me', function(req, res) {
-    return res.json({ status: Const.STATUS.OK, user: req.user});
+    return res.json({ status: Const.STATUS.OK, result: req.user});
+  });
+
+  api.get('/get_user', userMiddleware.idRequired, function(req, res) {
+    User.getUser(req.query.id, function(user) {
+      return res.json({ status: Const.STATUS.OK, result: user});
+    }, function(err) {
+      return res.json({ status: Const.STATUS.OK, comment: err});
+    });
+  });
+
+  api.get('/add_user', userMiddleware.adminOnly, userMiddleware.userRequired, userMiddleware.passwordRequired, function(req, res) {
+    User.addUser(req.query.user, req.query.password, function() {
+      return res.json({ status: Const.STATUS.OK });
+    }, function(err) {
+      return res.json({ status: Const.STATUS.OK, comment: err});
+    });
+  });
+
+  api.get('/remove_user', userMiddleware.adminOnly, userMiddleware.userRequired, function(req, res) {
+    User.removeUser(req.query.user, function() {
+      return res.json({ status: Const.STATUS.OK });
+    }, function(err) {
+      return res.json({ status: Const.STATUS.OK, comment: err});
+    });
+  });
+
+  api.get('/edit_user', userMiddleware.userRequired, function(req, res) {
+    User.editUser(req.query.user, function() {
+      return res.json({ status: Const.STATUS.OK });
+    }, function(err) {
+      return res.json({ status: Const.STATUS.OK, comment: err});
+    });
+  });
+
+  api.get('/edit_password', userMiddleware.userRequired, userMiddleware.passwordRequired, function(req, res) {
+    User.editPassword(req.query.user, req.query.password, function() {
+      return res.json({ status: Const.STATUS.OK });
+    }, function(err) {
+      return res.json({ status: Const.STATUS.OK, comment: err});
+    });
+  });
+
+  api.get('/get_all_users', function(req, res) {
+    User.getAllUsers(function(users) {
+      return res.json({ status: Const.STATUS.OK, result: users});
+    }, function(err) {
+      return res.json({ status: Const.STATUS.OK, comment: err});
+    });
+  });
+
+  api.get('/get_notify_users', function(req, res) {
+    User.getNotifyUsers(function(users) {
+      return res.json({ status: Const.STATUS.OK, result: users});
+    }, function(err) {
+      return res.json({ status: Const.STATUS.OK, comment: err});
+    });
   });
 
   return api;
