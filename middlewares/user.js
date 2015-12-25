@@ -16,6 +16,22 @@ exports.adminOnly = function(req, res, next) {
   next();
 }
 
+exports.userIdCheck = function(req, res, next) {
+  if (!req.user || (!req.user.is_admin && req.user.id != req.query.id)) {
+    return res.json({ status: Const.STATUS.FAILED, 
+                      comment: Const.MESSAGE.UNAUTHORIZED_ACCESS });
+  }
+  next();
+}
+
+exports.userObjectCheck = function(req, res, next) {
+  if (!req.user || (!req.user.is_admin && req.user.id != req.query.user.id)) {
+    return res.json({ status: Const.STATUS.FAILED, 
+                      comment: Const.MESSAGE.UNAUTHORIZED_ACCESS });
+  }
+  next();
+}
+
 exports.idRequired = function(req, res, next) {
   if (!req.query.id) {
     return res.json({ status: Const.STATUS.FAILED, 

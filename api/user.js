@@ -89,7 +89,7 @@ module.exports = function(wagner) {
     });
   });
 
-  api.get('/edit_user', userMiddleware.userRequired, function(req, res) {
+  api.get('/edit_user', userMiddleware.userRequired, userMiddleware.userObjectCheck, function(req, res) {
     User.editUser(JSON.parse(req.query.user), function() {
       return res.json({ status: Const.STATUS.OK });
     }, function(err) {
@@ -97,7 +97,7 @@ module.exports = function(wagner) {
     });
   });
 
-  api.get('/edit_password', userMiddleware.userRequired, userMiddleware.passwordRequired, function(req, res) {
+  api.get('/edit_password', userMiddleware.userRequired, userMiddleware.passwordRequired, userMiddleware.userObjectCheck, function(req, res) {
     User.editPassword(JSON.parse(req.query.user), req.query.password, function() {
       return res.json({ status: Const.STATUS.OK });
     }, function(err) {
