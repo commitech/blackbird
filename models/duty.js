@@ -146,12 +146,28 @@ module.exports = function(sequelize, DataTypes) {
       },
 
       assignPermanentDuty: function(user, duty, callbackOk, callbackError) {
-        // TODO : Remove all grab / release activity that involves this duty ID.
-        this.update({ supervisor: user.id }, { where: { id: duty.id } }).then(function(){
-          callbackOk();
-        },function(err){
+        var GrabbedDuty = this.wagner.invoke(function(GrabbedDuty) {
+          return GrabbedDuty;
+        });
+        var ReleasedDuty = this.wagner.invoke(function(ReleasedDuty) {
+          return ReleasedDuty;
+        });
+        var that = this;
+        
+        // Remove all grab / release activity that involves this duty ID.
+        GrabbedDuty.destroy({where: {duty_id: duty.id}}).then( function() {
+          ReleasedDuty.destroy({where: {duty_id: duty.id}}).then( function() {
+            that.update({ supervisor: user.id }, { where: { id: duty.id } }).then(function() {
+              callbackOk();
+            }, function(err){
+              callbackError(err);
+            });
+          }, function(err) {
+            callbackError(err);
+          });
+        }, function(err) {
           callbackError(err);
-        })
+        });
       },
 
       assignPermanentDuties: function(user, duties, callbackOk, callbackError) {
