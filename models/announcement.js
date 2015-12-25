@@ -25,5 +25,16 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false,
       defaultValue: sequelize.fn('NOW')
     }
+  }, {
+    classMethods: {
+      getAnnouncement: function(userId, callbackOk, callbackError) {
+        this.findById(userId).then( function(announcement) {
+          callbackOk(announcement);
+        }, function(err) {
+          callbackError(err);
+        });
+      },
+    }
   });
+
 };

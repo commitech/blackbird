@@ -7,6 +7,7 @@ module.exports = function(wagner) {
   api.get('*', userMiddleware.loggedInOnly);
   api.use('/user', require('./user')(wagner));
   api.use('/duty', require('./duty')(wagner));
+  api.use('/announcement', require('./announcement')(wagner));
 
   return api;
 }
