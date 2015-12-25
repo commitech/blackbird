@@ -38,57 +38,43 @@ module.exports = function(sequelize, DataTypes) {
       },
 
       getSupervisorId: function(specificDuty, callback) {
-        var GrabbedDuty = this.wagner.invoke(function(GrabbedDuty) {
-          return GrabbedDuty;
-        });
         var ReleasedDuty = this.wagner.invoke(function(ReleasedDuty) {
           return ReleasedDuty;
         });
 
         this.findById(specificDuty.duty_id).then( function(duty) {
-          GrabbedDuty.findAll({ where: _.pick(specificDuty, 'duty_id', 'day', 'month', 'year') }).then(function(grabbed) {
-            
-            ReleasedDuty.findAll({ where: _.pick(specificDuty, 'duty_id', 'day', 'month', 'year') }).then(function(released) {
-              if (released.length == grabbed.length) {
-                if (grabbed.length == 0) {
-                  // no release/grab yet. go back to original schedule
-                  callback(false, duty.dataValues.supervisor);
-                } else {
-                  // check the latest grabbed entry.
-                  callback(false, grabbed[grabbed.length - 1].dataValues.supervisor_id);
-                }
+          ReleasedDuty.findAll({ where: _.pick(specificDuty, 'duty_id', 'day', 'month', 'year') }).then(function(released) {
+            if (released.length == 0) {
+              // no release/grab yet. go back to original schedule
+              callback(false, duty.dataValues.supervisor);
+            } else {
+              // check the latest grabbed entry.
+              if (released[released.length - 1].grabbed_supervisor_id != null) {
+                callback(false, released[released.length - 1].dataValues.grabbed_supervisor_id);  
               } else {
-                // released has more entries than grabbed. 
-                // duty has been released and not grabbed yet.
-                callback(true, released[released.length - 1].dataValues.supervisor_id);
+                callback(true, released[released.length - 1].dataValues.released_supervisor_id);  
               }
-            });
+            }
           });
         });
       },
 
       grabDuty: function(user, specificDuty, grabRestriction, callbackOk, callbackError) {
-        var GrabbedDuty = this.wagner.invoke(function(GrabbedDuty) {
-          return GrabbedDuty;
+        var ReleasedDuty = this.wagner.invoke(function(ReleasedDuty) {
+          return ReleasedDuty;
         });
 
-        this.getSupervisorId(specificDuty, function(freeSlot, supervisorId) {
-          if (freeSlot) {
-            // duty is free. released and not grabbed yet
-
-            var grabbedDuty = specificDuty;
-            grabbedDuty.supervisor_id = user.id;
-
-            // TODO : Check for grabRestriction.
-
-            GrabbedDuty.create(grabbedDuty).then(function(){
-              callbackOk();
-            }, function(err){
-              console.log(err);
-            });
-          } else {
+        ReleasedDuty.findAll({ where: _.pick(specificDuty, 'duty_id', 'day', 'month', 'year') }).then(function(released) {
+          if (released.length == 0 || released[released.length - 1].grabbed_supervisor_id != null) {
             // duty is not free.
             callbackError('Duty is not available for grab');
+          } else {
+            // TODO : Check for grabRestriction
+            ReleasedDuty.update({grabbed_supervisor_id: user.id}, {where:{id:released[released.length - 1].dataValues.id}}).then(function() {
+              callbackOk();
+            }, function(err) {
+              callbackError(err);
+            });
           }
         });
       },
@@ -117,7 +103,7 @@ module.exports = function(sequelize, DataTypes) {
             // duty is indeed belong to the user
             
             var releasedDuty = specificDuty;
-            specificDuty.supervisor_id = user.id;
+            specificDuty.released_supervisor_id = user.id;
 
             ReleasedDuty.create(releasedDuty).then(function(){
               callbackOk();
@@ -146,23 +132,16 @@ module.exports = function(sequelize, DataTypes) {
       },
 
       assignPermanentDuty: function(user, duty, callbackOk, callbackError) {
-        var GrabbedDuty = this.wagner.invoke(function(GrabbedDuty) {
-          return GrabbedDuty;
-        });
         var ReleasedDuty = this.wagner.invoke(function(ReleasedDuty) {
           return ReleasedDuty;
         });
         var that = this;
         
         // Remove all grab / release activity that involves this duty ID.
-        GrabbedDuty.destroy({where: {duty_id: duty.id}}).then( function() {
-          ReleasedDuty.destroy({where: {duty_id: duty.id}}).then( function() {
-            that.update({ supervisor: user.id }, { where: { id: duty.id } }).then(function() {
-              callbackOk();
-            }, function(err){
-              callbackError(err);
-            });
-          }, function(err) {
+        ReleasedDuty.destroy({where: {duty_id: duty.id}}).then( function() {
+          that.update({ supervisor: user.id }, { where: { id: duty.id } }).then(function() {
+            callbackOk();
+          }, function(err){
             callbackError(err);
           });
         }, function(err) {
@@ -259,8 +238,45 @@ module.exports = function(sequelize, DataTypes) {
         });
       },
 
-      getFreeDuties: function(day, month, year, location) {
-        // TODO
+      getFreeDuties: function(day, month, year, callbackOk, callbackError) {
+        this.getAllFreeDuties(function(freeDuties) {
+          var countedDuties = 0;
+          var filteredDuties = new Array();
+          freeDuties.forEach(function(freeDuty) {
+            if (freeDuty.day == day && freeDuty.month == month && freeDuty.year == year) {
+              filteredDuties.push(freeDuty);
+            }
+            ++countedDuties;
+            if (countedDuties == freeDuties.length) {
+              callbackOk(filteredDuties);
+            }
+          });
+        }, function(err) {
+          callbackError(err);
+        })
+      },
+
+      getAllFreeDuties: function(callbackOk, callbackError) {
+        var ReleasedDuty = this.wagner.invoke(function(ReleasedDuty) {
+          return ReleasedDuty;
+        });
+
+        var freeDuties = new Array();
+
+        ReleasedDuty.findAll().then(function(schedules) {
+          var countedSchedules = 0;
+          schedules.forEach(function(schedule) {
+            if (schedule.dataValues.grabbed_supervisor_id == null) {
+              freeDuties.push(schedule.dataValues);
+            }
+            ++countedSchedules;
+            if (countedSchedules == schedules.length) {
+              callbackOk(freeDuties);
+            }
+          });
+        }, function(err) {
+          callbackError(err);
+        });
       }
     }
   });

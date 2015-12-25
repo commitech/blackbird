@@ -8,7 +8,7 @@ module.exports = function(sequelize, DataTypes) {
       primaryKey: true,
       autoIncrement: true
     },
-    supervisor_id: {
+    released_supervisor_id: {
       type: DataTypes.INTEGER(11),
       allowNull: false
     },
@@ -31,6 +31,16 @@ module.exports = function(sequelize, DataTypes) {
     release_time: {
       type: DataTypes.DATE,
       allowNull: false,
+      defaultValue: sequelize.fn('NOW')
+    },
+    grabbed_supervisor_id: {
+      type: DataTypes.INTEGER(11),
+      allowNull: true,
+      defaultValue: null
+    },
+    grab_time: {
+      type: DataTypes.DATE,
+      allowNull: true,
       defaultValue: sequelize.fn('NOW')
     }
   });

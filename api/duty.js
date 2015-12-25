@@ -107,5 +107,23 @@ module.exports = function(wagner) {
     });
   });
 
+  api.get('/get_free_duties', dutyMiddleware.dayRequired, dutyMiddleware.monthRequired, dutyMiddleware.yearRequired, function(req, res) {
+    Duty.getFreeDuties(req.query.day, req.query.month, req.query.year, function(specificDuties) {
+      return res.json({ status: Const.STATUS.OK,
+                        result: specificDuties});
+    }, function(err) {
+      return res.json({ status: Const.STATUS.FAILED, comment: err });
+    });
+  });
+
+  api.get('/get_all_free_duties', function(req, res) {
+    Duty.getAllFreeDuties(function(specificDuties) {
+      return res.json({ status: Const.STATUS.OK,
+                        result: specificDuties});
+    }, function(err) {
+      return res.json({ status: Const.STATUS.FAILED, comment: err });
+    });
+  });
+
   return api;
 }
