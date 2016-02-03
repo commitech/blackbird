@@ -246,9 +246,7 @@ Parameter :
 
 `user` : User object. Required parameter : `id`. Optional parameter (only those parameter to change) : `name`, `matric_number`, `contact`, `email`, `cell`, `position`, `is_noitifcation`, `status`, `is_admin`, `tracking`, `is_duty` 
 
-*Authorization : This method must only be called by admin or a non-admin the user that is specified. Call from other user will result in a Unauthorized Access error.
-
-If the caller is admin, then all parameter of the user object is considered. If the caller is the non-admin user, then only `contact` and `email` will be considered, since the user can't change it's `status`, for example.*
+*Authorization : This method must only be called by admin or a non-admin the user that is specified. Call from other user will result in a Unauthorized Access error. If the caller is admin, then all parameter of the user object is considered. If the caller is the non-admin user, then only `contact` and `email` will be considered, since the user can't change it's `status`, for example.*
 
 
 
