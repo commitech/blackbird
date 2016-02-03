@@ -3,5 +3,5 @@ pages:
     - [index.md, Welcome]
     - [object.md, Object types]
     - [method.md, Methods]
-theme: united
+theme: readthedocs
 repo_url: https://github.com/commitech/blackbird
