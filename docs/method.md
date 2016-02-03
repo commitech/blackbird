@@ -255,11 +255,13 @@ If the caller is admin, then all parameter of the user object is considered. If 
 
 ### user/edit_password
 
+**IMPORTANT : This API must be called using POST request, as it consist password**
+
+Parameter :
+
 `user` : User object. Required parameter : `id`
 
 `password` : String. New password
-
-**IMPORTANT : This API must be called using POST request, as it consist password**
 
 *Authorization : This method must only be called by admin or the user that is specified. Call from other user will result in a Unauthorized Access error.*
 
