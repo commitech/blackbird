@@ -59,6 +59,18 @@ module.exports = function(sequelize, DataTypes) {
         });
       },
 
+      canGrabDuty: function(user, specificDuty, callbackOk, callbackError) {
+        callbackOk(true);/*
+        User.getUser(user.id, function(userObject) {
+          if (userObject.position != "Subcom") {
+            callbackOk(true);
+          }
+          // TODO : Check whether the subcom can grab this duty
+        }, function(err) {
+          callbackError(err);
+        });*/
+      },
+
       grabDuty: function(user, specificDuty, grabRestriction, callbackOk, callbackError) {
         var ReleasedDuty = this.wagner.invoke(function(ReleasedDuty) {
           return ReleasedDuty;
@@ -69,9 +81,16 @@ module.exports = function(sequelize, DataTypes) {
             // duty is not free.
             callbackError('Duty is not available for grab');
           } else {
-            // TODO : Check for grabRestriction
-            ReleasedDuty.update({grabbed_supervisor_id: user.id}, {where:{id:released[released.length - 1].dataValues.id}}).then(function() {
-              callbackOk();
+            canGrabDuty(user, specificDuty, function(canGrab) {
+              if (canGrab) {
+                ReleasedDuty.update({grabbed_supervisor_id: user.id}, {where:{id:released[released.length - 1].dataValues.id}}).then(function() {
+                  callbackOk();
+                }, function(err) {
+                  callbackError(err);  
+                });
+              } else {
+                callbackError(canGrab);
+              }
             }, function(err) {
               callbackError(err);
             });

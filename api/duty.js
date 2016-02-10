@@ -10,8 +10,7 @@ module.exports = function(wagner) {
     return Duty;
   });
 
-  api.get('/get_duty', dutyMiddleware.idRequired, 
-    function(req, res) {
+  api.get('/get_duty', dutyMiddleware.idRequired, function(req, res) {
     Duty.getDuty(req.query.id, function(duty) {
       return res.json({ status: Const.STATUS.OK,
                         result: duty });
@@ -22,6 +21,14 @@ module.exports = function(wagner) {
     Duty.getSupervisorId(JSON.parse(req.query.specific_duty), function(freeSlot, supervisorId) {
       return res.json({ status: Const.STATUS.OK,
                         result: { is_free: freeSlot, supervisor_id: supervisorId } });
+    });
+  });
+
+  api.get('/can_grab_duty', dutyMiddleware.specificDutyRequired, dutyMiddleware.userRequired, function(req, res) {
+    Duty.canGrabDuty(JSON.parse(req.query.user), JSON.parse(req.query.specific_duty), function(can) {
+      return res.json({ status: Const.STATUS.OK, result: can });
+    }, function(err) {
+      return res.json({ status: Const.STATUS.FAILED, comment: err });
     });
   });
 
