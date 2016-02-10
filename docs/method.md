@@ -20,7 +20,12 @@ Returns a duty object `return` that has the property `return.id = id`
 
 Returns a boolean, whether the user can grab the duty specified. If the `user` is not a Subcom, then it will always return `true`.
 
+A Subcom will not be able to grab a duty if doing so will cause at least one of these :
 
+1. The user will have more than 14 hours of duty in a week. A week is defined from Monday to Sunday.
+2. The user will have to rush from CL to YIH (or vice versa) because of consecutive duty.
+3. The user will have to duty for more than 4 hours consecutively.
+4. The user will have to open or close YIH. Only MC has the key for YIH.
 
 ### duty/grab_duty
 
