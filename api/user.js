@@ -5,6 +5,8 @@ var LocalStrategy = require('passport-local').Strategy;
 var Const = require('../const');
 var userMiddleware = require('../middlewares/user');
 
+var _ = require('underscore');
+
 module.exports = function(wagner) {
   var api = express.Router();
 
@@ -62,7 +64,7 @@ module.exports = function(wagner) {
   });
 
   api.get('/me', function(req, res) {
-    return res.json({ status: Const.STATUS.OK, result: req.user});
+    return res.json({ status: Const.STATUS.OK, result: _.omit(req.user.dataValues, ['password'])});
   });
 
   api.get('/get_user', userMiddleware.idRequired, function(req, res) {
