@@ -125,5 +125,13 @@ module.exports = function(wagner) {
     });
   });
 
+  api.get('/can_grab_duty', dutyMiddleware.specificDutyRequired, dutyMiddleware.userRequired, function(req, res) {
+    Duty.canGrabDuty(JSON.parse(req.query.user), JSON.parse(req.query.specific_duty), function() {
+      return res.json({ status: Const.STATUS.OK,}); // can grab
+	}, function(err) {
+      return res.json({ status: Const.STATUS.FAILED, comment: err }); // can't grab for reason err
+	});
+  });
+
   return api;
 }
