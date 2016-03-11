@@ -48,8 +48,13 @@ module.exports = function(wagner) {
 
   api.post('/login', function(req, res, next) {
     passport.authenticate('local', function(err, user, info) {
-      if (err) { return res.json({ status: Const.STATUS.FAILED }); }
-      if (!user) { return res.json({ status: Const.STATUS.FAILED }); }
+      if (err) { 
+        return res.json({ status: Const.STATUS.FAILED, comment: err }); 
+      }
+      if (!user) { 
+        res.status(Const.NOT_LOGGED_IN_ERROR_CODE);
+        return res.json({ status: Const.STATUS.FAILED, comment: Const.MESSAGE.FAILED_LOG_IN}); 
+      }
       req.logIn(user, function(err) {
         if (err) { return next(err); }
         return res.json({ status: Const.STATUS.OK });

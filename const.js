@@ -5,6 +5,7 @@ exports.STATUS = {
 
 exports.MESSAGE = {
   NOT_LOGGED_IN: 'Not Logged In',
+  FAILED_LOG_IN: 'Log In Failed. Check your username and password again',
   UNAUTHORIZED_ACCESS: 'Unauthorized Access',
 }
 
