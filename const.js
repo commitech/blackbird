@@ -10,3 +10,5 @@ exports.MESSAGE = {
 
 exports.DAY_NAME = [
   "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+exports.NOT_LOGGED_IN_ERROR_CODE = 401;
