@@ -88,7 +88,6 @@ describe("User API Tests", function() {
       });
 
       assert.equal(json.status, 'OK');
-      assert.equal(json.result.name, 'admin');
       done();
     });
 

@@ -44,7 +44,7 @@ describe("Duty API test", function(){
 
   it('cannot fetch data without logging in', function(done) {
     agent.get(URL_ROOT + '/get_duty').end(function(err, res) {
-      assert.equal(res.status, 200);
+      assert.equal(res.status, 401);
       var json;
       assert.doesNotThrow(function() {
         json = JSON.parse(res.text);

@@ -76,12 +76,14 @@ module.exports = function(sequelize, DataTypes) {
           return ReleasedDuty;
         });
 
+        var that = this;
+
         ReleasedDuty.findAll({ where: _.pick(specificDuty, 'duty_id', 'day', 'month', 'year') }).then(function(released) {
           if (released.length == 0 || released[released.length - 1].grabbed_supervisor_id != null) {
             // duty is not free.
             callbackError('Duty is not available for grab');
           } else {
-            canGrabDuty(user, specificDuty, function(canGrab) {
+            that.canGrabDuty(user, specificDuty, function(canGrab) {
               if (canGrab) {
                 ReleasedDuty.update({grabbed_supervisor_id: user.id}, {where:{id:released[released.length - 1].dataValues.id}}).then(function() {
                   callbackOk();
