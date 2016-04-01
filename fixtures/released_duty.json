@@ -1,0 +1,14 @@
+[
+  {
+    "model": "ReleasedDuty",
+    "data": {
+      "id": "1",
+      "released_supervisor_id": "1",
+      "duty_id": "4",
+      "day": "4",
+      "month": "4",
+      "year": "2016",
+      "release_time": "2016-04-01 10:49:31"
+    }
+  }
+]

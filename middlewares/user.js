@@ -26,7 +26,7 @@ exports.userIdCheck = function(req, res, next) {
 }
 
 exports.userObjectCheck = function(req, res, next) {
-  if (!req.user || (!req.user.is_admin && req.user.id != req.query.user.id)) {
+  if (!req.user || (!req.user.is_admin && req.user.id != JSON.parse(req.query.user).id)) {
     return res.json({ status: Const.STATUS.FAILED, 
                       comment: Const.MESSAGE.UNAUTHORIZED_ACCESS });
   }

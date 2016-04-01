@@ -36,7 +36,7 @@ module.exports = function(wagner) {
     });
   });
 
-  api.get('/grab_duty', dutyMiddleware.specificDutyRequired, dutyMiddleware.userRequired, function(req, res) {
+  api.get('/grab_duty', userMiddleware.userObjectCheck, dutyMiddleware.specificDutyRequired, dutyMiddleware.userRequired, function(req, res) {
     User.getUser(JSON.parse(req.query.user).id, function(user) {
       Duty.grabDuty(user, JSON.parse(req.query.specific_duty), true, function() {
         return res.json({ status: Const.STATUS.OK});
@@ -48,7 +48,7 @@ module.exports = function(wagner) {
     });
   });
 
-  api.get('/grab_duties', dutyMiddleware.specificDutiesRequired, dutyMiddleware.userRequired, function(req, res) {
+  api.get('/grab_duties', userMiddleware.userObjectCheck, dutyMiddleware.specificDutiesRequired, dutyMiddleware.userRequired, function(req, res) {
     User.getUser(JSON.parse(req.query.user).id, function(user) {
       Duty.grabDuties(user, JSON.parse(req.query.specific_duties), true, function() {
         return res.json({ status: Const.STATUS.OK});
@@ -60,7 +60,7 @@ module.exports = function(wagner) {
     });
   });
 
-  api.get('/release_duty', dutyMiddleware.specificDutyRequired, dutyMiddleware.userRequired, function(req, res) {
+  api.get('/release_duty', userMiddleware.userObjectCheck, dutyMiddleware.specificDutyRequired, dutyMiddleware.userRequired, function(req, res) {
     User.getUser(JSON.parse(req.query.user).id, function(user) {
       Duty.releaseDuty(user, JSON.parse(req.query.specific_duty), function() {
         return res.json({ status: Const.STATUS.OK});
@@ -72,7 +72,7 @@ module.exports = function(wagner) {
     });
   });
 
-  api.get('/release_duties', dutyMiddleware.specificDutiesRequired, dutyMiddleware.userRequired, function(req, res) {
+  api.get('/release_duties', userMiddleware.userObjectCheck, dutyMiddleware.specificDutiesRequired, dutyMiddleware.userRequired, function(req, res) {
     User.getUser(JSON.parse(req.query.user).id, function(user) {
       Duty.releaseDuties(user, JSON.parse(req.query.specific_duties), function() {
         return res.json({ status: Const.STATUS.OK});
