@@ -34,7 +34,7 @@ Represents a duty.
 
 `id` : Integer. The ID of a duty. A duty which have the same day AND the same timing have the same ID.
 
-`day_name` : String. The day of the week of the duty. 
+`day_name` : String. The day of the week of the duty. It will be either `Sunday`, `Monday`, `Tuesday`, `Wednesday`, `Thursday`, `Friday`, or `Saturday`.
 
 `start_time` : String. hh:mm:ss format.
 
