@@ -10,6 +10,10 @@ module.exports = function(wagner) {
     return Duty;
   });
 
+  var User = wagner.invoke(function(User) {
+    return User;
+  })
+
   api.get('/get_duty', dutyMiddleware.idRequired, function(req, res) {
     Duty.getDuty(req.query.id, function(duty) {
       return res.json({ status: Const.STATUS.OK,
@@ -33,32 +37,48 @@ module.exports = function(wagner) {
   });
 
   api.get('/grab_duty', dutyMiddleware.specificDutyRequired, dutyMiddleware.userRequired, function(req, res) {
-    Duty.grabDuty(JSON.parse(req.query.user), JSON.parse(req.query.specific_duty), true, function() {
-      return res.json({ status: Const.STATUS.OK});
+    User.getUser(JSON.parse(req.query.user).id, function(user) {
+      Duty.grabDuty(user, JSON.parse(req.query.specific_duty), true, function() {
+        return res.json({ status: Const.STATUS.OK});
+      }, function(err) {
+        return res.json({ status: Const.STATUS.FAILED, comment: err });
+      });
     }, function(err) {
       return res.json({ status: Const.STATUS.FAILED, comment: err });
     });
   });
 
   api.get('/grab_duties', dutyMiddleware.specificDutiesRequired, dutyMiddleware.userRequired, function(req, res) {
-    Duty.grabDuties(JSON.parse(req.query.user), JSON.parse(req.query.specific_duties), true, function() {
-      return res.json({ status: Const.STATUS.OK});
+    User.getUser(JSON.parse(req.query.user).id, function(user) {
+      Duty.grabDuties(user, JSON.parse(req.query.specific_duties), true, function() {
+        return res.json({ status: Const.STATUS.OK});
+      }, function(err) {
+        return res.json({ status: Const.STATUS.FAILED, comment: err });
+      });
     }, function(err) {
       return res.json({ status: Const.STATUS.FAILED, comment: err });
     });
   });
 
   api.get('/release_duty', dutyMiddleware.specificDutyRequired, dutyMiddleware.userRequired, function(req, res) {
-    Duty.releaseDuty(JSON.parse(req.query.user), JSON.parse(req.query.specific_duty), function() {
-      return res.json({ status: Const.STATUS.OK});
+    User.getUser(JSON.parse(req.query.user).id, function(user) {
+      Duty.releaseDuty(user, JSON.parse(req.query.specific_duty), function() {
+        return res.json({ status: Const.STATUS.OK});
+      }, function(err) {
+        return res.json({ status: Const.STATUS.FAILED, comment: err });
+      });
     }, function(err) {
       return res.json({ status: Const.STATUS.FAILED, comment: err });
     });
   });
 
   api.get('/release_duties', dutyMiddleware.specificDutiesRequired, dutyMiddleware.userRequired, function(req, res) {
-    Duty.releaseDuties(JSON.parse(req.query.user), JSON.parse(req.query.specific_duties), function() {
-      return res.json({ status: Const.STATUS.OK});
+    User.getUser(JSON.parse(req.query.user).id, function(user) {
+      Duty.releaseDuties(user, JSON.parse(req.query.specific_duties), function() {
+        return res.json({ status: Const.STATUS.OK});
+      }, function(err) {
+        return res.json({ status: Const.STATUS.FAILED, comment: err });
+      });
     }, function(err) {
       return res.json({ status: Const.STATUS.FAILED, comment: err });
     });
@@ -127,6 +147,18 @@ module.exports = function(wagner) {
     Duty.getAllFreeDuties(function(specificDuties) {
       return res.json({ status: Const.STATUS.OK,
                         result: specificDuties});
+    }, function(err) {
+      return res.json({ status: Const.STATUS.FAILED, comment: err });
+    });
+  });
+
+  api.get('/can_grab_duty', dutyMiddleware.specificDutyRequired, dutyMiddleware.userRequired, function(req, res) {
+    User.getUser(JSON.parse(req.query.user).id, function(user) {
+      Duty.canGrabDuty(user, JSON.parse(req.query.specific_duty), function() {
+        return res.json({ status: Const.STATUS.OK,}); // can grab
+      }, function(err) {
+        return res.json({ status: Const.STATUS.FAILED, comment: err }); // can't grab for reason err
+      });  
     }, function(err) {
       return res.json({ status: Const.STATUS.FAILED, comment: err });
     });

@@ -165,6 +165,7 @@ describe("Duty API test", function(){
       assert.doesNotThrow(function() {
         json = JSON.parse(res.text);
       });
+      console.log(json);
       assert.equal(json.status, 'OK');
       
       Duty.getSupervisorId(specificDuty, function(freeSlot, supervisorId) {

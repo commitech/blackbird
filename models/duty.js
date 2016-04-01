@@ -32,7 +32,7 @@ module.exports = function(sequelize, DataTypes) {
   }, {
     classMethods: {
       getDuty: function(dutyId, callback) {
-        this.findById(dutyId).then( function(duty) {
+        this.findById(dutyId).then(function(duty) {
           callback(duty);
         });
       },
@@ -59,18 +59,103 @@ module.exports = function(sequelize, DataTypes) {
         });
       },
 
+      //When a member releases 2 hours of duty, it is a requirement to grab both hours of duty.
+      //If a supervisor releases a 3 (three) hour duty, please grab all 3 (three) hours. => noSingleHourLeft
+      //Cannot have consecutive duties in clb and yih => checked inside DayLimit
+      //One week 14 hours limit => withinWeekLimit
+      //One day 4 hours limit? => within DayLimit
       canGrabDuty: function(user, specificDuty, callbackOk, callbackError) {
-        callbackOk(true);/*
-        User.getUser(user.id, function(userObject) {
-          if (userObject.position != "Subcom") {
-            callbackOk(true);
+        if (user.position.toLowerCase() != 'subcom') {
+          callbackOk({can: true});
+          return;
+        }
+        
+        //Calculting consequtive hours of duty of the supervisor.
+        //Checking consecutinve duties in clb and yih along the way.
+        this.getConsecHours(specificDuty, user, function(consecHours) {
+          if (consecHours > 4) {
+            callbackOk({can: false, message: "Your consecutive duty-hour has exceeded 4"});
+          } else {
+            //Calculting the total hours of duty of the supervisor in one week.
+            this.getWeekHours(specificDuty, user, function(weekHours) {
+              if (weekHours > 14) {
+                callbackOk({can: false, message: "Your total duty-hour has exceeded 14 for this week"});
+              } else {
+                callbackOk({can: true});
+              }
+            }, function(err) {
+                callbackError(err);
+            });
           }
-          // TODO : Check whether the subcom can grab this duty
         }, function(err) {
           callbackError(err);
-        });*/
+        });
       },
 
+      canGrabDuties: function(user, duties, callbackOk, callbackError) {
+        if (duties.length < 1) {
+          callbackError();
+        }
+        this.findAll({ where: {day_name: duties[0].day_name}}).then(function(all) {
+          // TODO (zichao)
+        });
+      },
+
+      //This method returns the total hours of duty of the supervisor if he grabs the duty.
+      getWeekHours: function(specificDuty, user, callbackOk, callbackError) {
+        var weekHours = 0;
+        this.findAll({ where: {supervisor: user.id}}).then(function(dutyOfTheWeek) {
+          dutyOfTheWeek.forEach(function(duty) {
+            weekHours += Math.abs(duty.start_time - duty.end_time) / 3600000;
+          });
+          weekHours += Math.abs(specificDuty.start_time - specificDuty.end_time) / 3600000;
+          callbackOk(weekHours);
+        });
+      },
+
+      //callbackOk with the consecutive hours of duty that a supervisor would have if he grabbed this specific duty.
+      //callbackError if the supervisor needs to rush between clb and yih.
+      getConsecHours: function(specificDuty, user, callbackOk, callbackError) {
+        this.findAll({ where: {day_name: specificDuty.day_name}, order: '"start_time" ASCE'}).then(function(duties) {
+          var startTime = specificDuty.start_time;
+          var endTime = specificDuty.end_time;
+          var venue = specificDuty.location.toLowerCase();
+          var centralIndex;
+          for (var i = 0; i < duties.length; i++) {
+            if (duties[i].start_time == startTime) {
+              centralIndex = i;
+            }
+          }
+          //Find upper
+          for (var i = centralIndex; i > -1; i--) {
+            var duty = duties[i];
+            if (duty.supervisor == user.id) {
+              startTime = duty.start_time;
+              if (duty.location.toLowerCase() != venue) {
+                callbackError("Rush.");
+              }
+            } else {
+              break;
+            }
+          }
+          
+          //Find lower
+          for (var i = centralIndex; i < duties.length; i++) {
+            if (duties[i].supervisor == user.id) {
+              endTime = duties[i].end_time;
+              if (duty.location.toLowerCase != venue) {
+                callbackError("Rush.");
+              }
+            } else {
+              break;
+            }
+          }
+
+          var consecHours = (startTime - endTime) / 3600000;
+          callbackOk(consecHours);
+        });
+      },
+ 
       grabDuty: function(user, specificDuty, grabRestriction, callbackOk, callbackError) {
         var ReleasedDuty = this.wagner.invoke(function(ReleasedDuty) {
           return ReleasedDuty;
@@ -84,7 +169,7 @@ module.exports = function(sequelize, DataTypes) {
             callbackError('Duty is not available for grab');
           } else {
             that.canGrabDuty(user, specificDuty, function(canGrab) {
-              if (canGrab) {
+              if (canGrab.can) {
                 ReleasedDuty.update({grabbed_supervisor_id: user.id}, {where:{id:released[released.length - 1].dataValues.id}}).then(function() {
                   callbackOk();
                 }, function(err) {
