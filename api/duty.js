@@ -152,12 +152,12 @@ module.exports = function(wagner) {
     });
   });
 
-  api.get('/can_grab_duty', dutyMiddleware.specificDutyRequired, dutyMiddleware.userRequired, function(req, res) {
+  api.get('/can_grab_duties', dutyMiddleware.specificDutyRequired, dutyMiddleware.userRequired, function(req, res) {
     User.getUser(JSON.parse(req.query.user).id, function(user) {
-      Duty.canGrabDuty(user, JSON.parse(req.query.specific_duty), function() {
-        return res.json({ status: Const.STATUS.OK,}); // can grab
+      Duty.canGrabDutiesUltimate(user, JSON.parse(req.query.specific_duty), function(obj) {
+        return res.json({ status: Const.STATUS.OK, result: obj});
       }, function(err) {
-        return res.json({ status: Const.STATUS.FAILED, comment: err }); // can't grab for reason err
+        return res.json({ status: Const.STATUS.FAILED, comment: err });
       });  
     }, function(err) {
       return res.json({ status: Const.STATUS.FAILED, comment: err });

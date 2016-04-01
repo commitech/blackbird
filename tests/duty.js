@@ -89,7 +89,7 @@ describe("Duty API test", function(){
       assert.deepEqual(json.result, {is_free: false, supervisor_id: 1});
       done();
     });
-  })
+  });
 
   it('cannot grab duty that is not free', function(done) {
     passportStub.login({ name: 'admin' });
