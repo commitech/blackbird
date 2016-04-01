@@ -42,6 +42,8 @@ Represents a duty.
 
 `location` : String. Either "yih" or "cl".
 
+`supervisor` : Integer. The ID of the supervisor that dutying on this duty slot, by default.
+
 ## Specific Duty
 
 Represents a duty at a certain day.
