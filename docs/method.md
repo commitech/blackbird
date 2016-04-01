@@ -133,7 +133,7 @@ Parameter :
 
 `specific_duty` : Specific Duty object. Required parameter : `duty_id`, `day`, `month`, `year`
 
-Returns the supervisor ID that is creleasedurrently dutying on `specific_duty `. The result will be an object consisting of `supervisor_id` and `is_free`. `is_free` is a boolean indicating whether a duty is free or not. If it is, `supervisor_id` is the ID of the supervisor who releases that duty.
+Returns the supervisor ID that is currently dutying on `specific_duty `. The result will be an object consisting of `supervisor_id` and `is_free`. `is_free` is a boolean indicating whether a duty is free or not. If it is, `supervisor_id` is the ID of the supervisor who releases that duty.
 
 
 
