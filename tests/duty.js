@@ -56,7 +56,8 @@ describe("Duty API test", function(){
   });
 
   it('can fetch data', function(done) {
-    passportStub.login({ name: 'admin' });
+    passportStub.login({ id:1, name: 'admin', is_admin: true });
+
     agent.get(URL_ROOT + '/get_duty?id=1').end(function(err, res) {
       assert.equal(res.status, 200);
       var json;
@@ -74,8 +75,25 @@ describe("Duty API test", function(){
     });
   });
 
+  it('subcom cannot grab opening duty', function(done) {
+    passportStub.login({ id:3, name: 'nonmctest', is_admin: false });
+    user = {"id": 3};
+
+    specificDuty = {duty_id: 4, day: 4, month: 4, year: 2016};
+
+    agent.get(URL_ROOT + '/grab_duty?user=' + JSON.stringify(user) + '&specific_duty=' + JSON.stringify(specificDuty)).end(function(err, res) {
+      assert.equal(res.status, 200);
+      var json;
+      assert.doesNotThrow(function() {
+        json = JSON.parse(res.text);
+      });
+      assert.equal(json.status, 'FAILED');
+      done();
+    });
+  });
+
   it('can get supervisor ID', function(done) {
-    passportStub.login({ name: 'admin' });
+    passportStub.login({ id:1, name: 'admin', is_admin: true });
 
     specificDuty = {duty_id: 1,day: 1, month: 1, year: 1};
 
@@ -92,7 +110,7 @@ describe("Duty API test", function(){
   })
 
   it('cannot grab duty that is not free', function(done) {
-    passportStub.login({ name: 'admin' });
+    passportStub.login({ id:1, name: 'admin', is_admin: true });
     
     user = {id: 1};
     specificDuty = {duty_id: 1,day: 1, month: 1, year: 1};
@@ -109,7 +127,7 @@ describe("Duty API test", function(){
   });
 
   it('cannot release duty that does not belong to the user', function(done) {
-    passportStub.login({ name: 'admin' });
+    passportStub.login({ id:1, name: 'admin', is_admin: true });
 
     user = {id: 2};
     specificDuty = {duty_id: 1,day: 1, month: 1, year: 1};
@@ -126,7 +144,7 @@ describe("Duty API test", function(){
   });
 
   it('can release duty that belongs to the user', function(done) {
-    passportStub.login({ name: 'admin' });
+    passportStub.login({ id:1, name: 'admin', is_admin: true });
 
     user = {id: 1};
 
@@ -154,10 +172,10 @@ describe("Duty API test", function(){
   });
 
   it('can grab duty that is free', function(done) {
-    passportStub.login({ name: 'admin' });
+    passportStub.login({ id:1, name: 'admin', is_admin: true });
 
     user = {id: 1};
-    specificDuty = {duty_id: 1,day: 1, month: 1, year: 1};
+    specificDuty = {duty_id: 4,day: 4, month: 4, year: 2016};
 
     agent.get(URL_ROOT + '/grab_duty?user=' + JSON.stringify(user) + '&specific_duty=' + JSON.stringify(specificDuty)).end(function(err, res) {
       assert.equal(res.status, 200);
@@ -178,7 +196,7 @@ describe("Duty API test", function(){
   });
 
   it('can assign duty permanently', function(done) {
-    passportStub.login({ name: 'admin', is_admin: true});
+    passportStub.login({ id:1, name: 'admin', is_admin: true });
 
     user = {id: 2};
     duty = {id: 1};
@@ -204,7 +222,7 @@ describe("Duty API test", function(){
   });
 
   it('cannot assign duty without admin access', function(done) {
-    passportStub.login({ name: 'admin', is_admin: false});
+    passportStub.login({ id:3, name: 'nonmctest', is_admin: false });
 
     user = {id: 2};
     duty = {id: 1};
