@@ -60,96 +60,159 @@ module.exports = function(sequelize, DataTypes) {
       },
 
       //When a member releases 2 hours of duty, it is a requirement to grab both hours of duty.
-      //If a supervisor releases a 3 (three) hour duty, please grab all 3 (three) hours. => noSingleHourLeft
-      //Cannot have consecutive duties in clb and yih => checked inside DayLimit
-      //One week 14 hours limit => withinWeekLimit
-      //One day 4 hours limit? => within DayLimit
-      canGrabDuty: function(user, specificDuty, callbackOk, callbackError) {
-        if (user.position.toLowerCase() != 'subcom') {
-          callbackOk({can: true});
-          return;
-        }
-        
-        //Calculting consequtive hours of duty of the supervisor.
-        //Checking consecutinve duties in clb and yih along the way.
-        this.getConsecHours(specificDuty, user, function(consecHours) {
-          if (consecHours > 4) {
-            callbackOk({can: false, message: "Your consecutive duty-hour has exceeded 4"});
-          } else {
-            //Calculting the total hours of duty of the supervisor in one week.
-            this.getWeekHours(specificDuty, user, function(weekHours) {
-              if (weekHours > 14) {
-                callbackOk({can: false, message: "Your total duty-hour has exceeded 14 for this week"});
-              } else {
-                callbackOk({can: true});
-              }
-            }, function(err) {
-                callbackError(err);
-            });
-          }
-        }, function(err) {
-          callbackError(err);
-        });
-      },
+	  //If a supervisor releases a 3 (three) hour duty, please grab all 3 (three) hours. => noSingleHourLeft
+	  //Cannot have consecutive duties in clb and yih => checked inside DayLimit
+	  //One week 14 hours limit => withinWeekLimit
+	  //One day 4 hours limit? => within DayLimit
+	  canGrabDuty: function(user, specificDuty, callbackOk, callbackError) {
+		if (user.position.toLowerCase() != 'subcom') {
+		  callbackOk({can: true});
+		  return;
+		}
+		
+		//Calculting consequtive hours of duty of the supervisor.
+		//Checking consecutinve duties in clb and yih along the way.
+		var duty = this.findById(specificDuty.duty_id);
+		this.getConsecHours(duty, user, function(consecHours) {
+		  if (consecHours > 4) {
+		  	callbackOk({can: false, message: "Your consecutive duty-hour has exceeded 4"});
+		  } else {
+			//Calculting the total hours of duty of the supervisor in one week.
+			this.getWeekHours(duty, user, function(weekHours) {
+			  if (weekHours > 14) {
+			  	callbackOk({can: false, message: "Your total duty-hour has exceeded 14 for this week"});
+			  } else {
+			  	callbackOk({can: true});
+			  }
+			}, function(err) {
+			  callbackError(err);
+			});
+		  }
+		}, function(err) {
+		  callbackError(err);
+		});
+	  },
 
-      canGrabDuties: function(user, duties, callbackOk, callbackError) {
-        if (duties.length < 1) {
-          callbackError();
-        }
-        this.findAll({ where: {day_name: duties[0].day_name}}).then(function(all) {
-          // TODO (zichao)
-        });
-      },
+	  canGrabDutiesInOneDay: function(user, specificDuties, callbackOk, callbackError) {
+	  	if (duties.length < 1) {
+			callbackError('');
+			return;
+		}
+		var day = specificDuties[0].day;
+		var month = specificDuties[0].month;
+		var year = specificDuties[0].year;
 
-      //This method returns the total hours of duty of the supervisor if he grabs the duty.
-      getWeekHours: function(specificDuty, user, callbackOk, callbackError) {
-        var weekHours = 0;
-        this.findAll({ where: {supervisor: user.id}}).then(function(dutyOfTheWeek) {
-          dutyOfTheWeek.forEach(function(duty) {
-            weekHours += Math.abs(duty.start_time - duty.end_time) / 3600000;
-          });
-          weekHours += Math.abs(specificDuty.start_time - specificDuty.end_time) / 3600000;
-          callbackOk(weekHours);
-        });
-      },
+		var numOfDtuies = 0;
+		specificDuties.forEach(function(specificDuty) {
+		  this.canGrabDuty(user, specificDuty, function() {
+			numOfDuties++;
+		  }, function(err) {
+			callbackError(err);
+		  });
+		});
+		if (numOfDuties != specificDuties.length) {
+		  callbackError("Duties grability failed to be checked."); //:(
+		}
+      	this.getFreeDuties(day, month, year, function(ids) {
+		  var duties = new Array();
+		  ids.forEach(function(id) {
+			var counter = 0;
+			specificDuties.forEach(function(duty) {
+			  if (duty.duty_id != id) counter++;
+			});
+			if (counter == specificDuties.length) {
+			  this.findById(id).then(function(duty) {
+				duties.push(duty);
+			  });
+			}
+		  }).then(function() {
+			duties.sort(function(a, b) {
+			  return a.start_time - b.start_time;
+			});
+			var startTime = duties[0].start_time;
+			var endTime = duties[0].end_time;
+			for (var i = 1; i < duties.length; i++) {
+			  if (duties[i].start_time != endTime) {
+				var duration = Math.abs(endTime - startTime) / 3600000;
+				if (duration < 2) {
+				  callbackOk({can: false, message: "This will leave behind duty duration that is less than 2 hours"});
+				} else {
+				  startTime = duties[i].start_time;
+				}
+			  } else {
+				  endTime = duties[i].end_time;
+			  }
+			// find duty slot which is less then 2 hours
+			// Rmb to check specific duty vs duty in canGrabDuty.
+			}
+			callbackOk({can: true});
+		  });
+		}, function(err) {
+			callbackError(err);
+		});
+	  },
 
-      //callbackOk with the consecutive hours of duty that a supervisor would have if he grabbed this specific duty.
-      //callbackError if the supervisor needs to rush between clb and yih.
-      getConsecHours: function(specificDuty, user, callbackOk, callbackError) {
-        this.findAll({ where: {day_name: specificDuty.day_name}, order: '"start_time" ASCE'}).then(function(duties) {
-          var startTime = specificDuty.start_time;
-          var endTime = specificDuty.end_time;
-          var venue = specificDuty.location.toLowerCase();
-          var centralIndex;
-          for (var i = 0; i < duties.length; i++) {
-            if (duties[i].start_time == startTime) {
-              centralIndex = i;
-            }
-          }
-          //Find upper
-          for (var i = centralIndex; i > -1; i--) {
-            var duty = duties[i];
-            if (duty.supervisor == user.id) {
-              startTime = duty.start_time;
-              if (duty.location.toLowerCase() != venue) {
-                callbackError("Rush.");
-              }
-            } else {
-              break;
-            }
-          }
-          
-          //Find lower
-          for (var i = centralIndex; i < duties.length; i++) {
-            if (duties[i].supervisor == user.id) {
-              endTime = duties[i].end_time;
-              if (duty.location.toLowerCase != venue) {
-                callbackError("Rush.");
-              }
-            } else {
-              break;
-            }
-          }
+	  canGrabDutiesUltimate: function(user, specificDuties, callbackOk, callbackError) {
+	  	var array = [];
+		specificDuties.forEach(function(specificDuty) {
+		  array[specificDuty.day] = [];
+		  array[specificDuty.day].push(specificDuty);
+		});
+		array.forEach(function(specificDutiesInOneDay) {
+		  return canGrabDutiesInOneDay(user, specificDutiesInOneDay, callbackOk, callbackError);
+		});
+	  },
+
+	  //This method returns the total hours of duty of the supervisor if he grabs the duty.
+	  getWeekHours: function(duty, user, callbackOk, callbackError) {
+		var weekHours = 0;
+		this.findAll({ where: {supervisor: user.id}}).then(function(dutyOfTheWeek) {
+		  dutyOfTheWeek.forEach(function(duty) {
+			weekHours += Math.abs(duty.end_time - duty.start_time) / 3600000;
+		  });
+		  weekHours += Math.abs(duty.end_time - duty.start_time) / 3600000;
+		  callbackOk(weekHours);
+		}, function(err) {
+		});
+	  },
+
+	  //callbackOk with the consecutive hours of duty that a supervisor would have if he grabbed this specific duty.
+	  //callbackError if the supervisor needs to rush between clb and yih.
+	  getConsecHours: function(duty, user, callbackOk, callbackError) {
+		this.findAll({ where: {day_name: duty.day_name}, order: '"start_time" ASCE'}).then(function(duties) {
+		  var startTime = duty.start_time;
+		  var endTime = duty.end_time;
+		  var venue = duty.location.toLowerCase();
+		  var centralIndex;
+		  for (var i = 0; i < duties.length; i++) {
+			if (duties[i].start_time == startTime) {
+			  centralIndex = i;
+			}
+		  }
+		  //Find upper
+		  for (var i = centralIndex; i > -1; i--) {
+			var duty = duties[i];
+			if (duty.supervisor == user.id) {
+			  startTime = duty.start_time;
+			  if (duty.location.toLowerCase() != venue) {
+				callbackError("Rush.");
+			  }
+			} else {
+			  break;
+			}
+		  }
+		  
+		  //Find lower
+		  for (var i = centralIndex; i < duties.length; i++) {
+			if (duties[i].supervisor == user.id) {
+			  endTime = duties[i].end_time;
+			  if (duty.location.toLowerCase != venue) {
+				callbackError("Rush.");
+			  }
+			} else {
+			  break;
+			}
+		  }
 
           var consecHours = (startTime - endTime) / 3600000;
           callbackOk(consecHours);
