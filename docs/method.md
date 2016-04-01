@@ -18,7 +18,7 @@ Returns a duty object `return` that has the property `return.id = id`
 
 `specific_duty` : Specific Duty object. Required parameter : `duty_id`, `day`, `month`, `year`
 
-Returns a boolean, whether the user can grab the duty specified. If the `user` is not a Subcom, then it will always return `true`.
+Returns an object `obj`. If the user can grab the duty specified, `obj` will always be `{can: true}`. Otherwise, `obj` will be `{can: false, message: <message>}` where `<message>` is the explanation why the user can't grab the duty. If the `user` is not a Subcom, he/she will be always able to grab the duty.
 
 A Subcom will not be able to grab a duty if doing so will cause at least one of these :
 
